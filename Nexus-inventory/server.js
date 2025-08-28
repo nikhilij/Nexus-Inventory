@@ -14,8 +14,17 @@ const productRoutes = require('./src/api/productsRoutes');
 const errorMiddleware = require('./src/middleware/errorMiddleware');
 
 // Sync database models
-sequelize.sync();
-
+// sequelize.sync();
+async function testConnection() {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Database connection has been established successfully.');
+  } catch (error) {
+    console.error('❌ Unable to connect to the database:', error);
+    process.exit(1); // Exit the process with a failure code
+  }
+}
+testConnection();
 // Built-in middleware to parse JSON bodies
 app.use(express.json());
 
