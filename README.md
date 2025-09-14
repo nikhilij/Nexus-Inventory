@@ -1,4 +1,3 @@
-```markdown
 # Nexus Inventory — Next.js Technical Guide (Before Development)
 
 Purpose
@@ -346,5 +345,3 @@ What's next (to execute)
 - Pick the exact Next.js version and confirm App Router usage.
 - Decide on monolith vs separate API boundary for your team.
 - I'll produce a ready-to-run project scaffold (package.json, next.config, tailwind, prisma schema, ESLint/Prettier config, example page & API routes, seed script) if you want — say "scaffold" and I will generate the files for the repository.
-
-```
