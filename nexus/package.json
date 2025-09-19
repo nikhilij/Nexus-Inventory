@@ -11,6 +11,7 @@
     "test:nav": "node test-navigation-behavior.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "mongodb": "^6.20.0",
     "mongoose": "^8.18.1",
     "next": "15.5.3",

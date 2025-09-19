@@ -1,5 +1,5 @@
 // services/AuthService.js
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { User, Session, PasswordResetToken } from "../models/index.js";
