@@ -83,10 +83,16 @@ export default function SubscriberGatePage() {
                <h1 className="text-2xl font-bold mb-4">Access requires sign in</h1>
                <p className="mb-6">You must be signed in to access subscriber-only areas.</p>
                <div className="flex gap-4">
-                  <Link href="/login" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                  <Link
+                     href="/login"
+                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+                  >
                      Sign in
                   </Link>
-                  <Link href="/signup" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                  <Link
+                     href="/signup"
+                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer"
+                  >
                      Sign up
                   </Link>
                </div>
@@ -115,10 +121,16 @@ export default function SubscriberGatePage() {
                      assistance setting up inventory tracking, integrations, or workflows.
                   </p>
                   <div className="flex gap-4 mb-4">
-                     <Link href="/contact" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                     <Link
+                        href="/contact"
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+                     >
                         Contact our team
                      </Link>
-                     <Link href="/signup" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                     <Link
+                        href="/signup"
+                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer"
+                     >
                         Start a subscription
                      </Link>
                   </div>
@@ -166,7 +178,7 @@ export default function SubscriberGatePage() {
                      <button
                         type="submit"
                         disabled={validating}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
                      >
                         {validating ? "Validating…" : "Unlock"}
                      </button>
@@ -199,7 +211,10 @@ export default function SubscriberGatePage() {
                Access granted. You may now enter the product inventory.
             </p>
             <div>
-               <Link href="/inventory" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+               <Link
+                  href="/inventory"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+               >
                   Enter Inventory
                </Link>
             </div>

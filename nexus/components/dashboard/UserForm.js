@@ -18,7 +18,7 @@ export default function UserForm() {
                   <option>Select Role</option>
                </select>
             </div>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
                Save User
             </button>
          </form>

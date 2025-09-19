@@ -12,7 +12,7 @@ export default function SettingsForm() {
                <label className="block text-sm font-medium mb-2">Email</label>
                <input type="email" className="w-full p-2 border rounded" />
             </div>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
                Save Settings
             </button>
          </form>

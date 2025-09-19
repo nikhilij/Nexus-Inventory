@@ -98,7 +98,7 @@ export default function Settings() {
                         </div>
 
                         <div className="mt-6">
-                           <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                           <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                               Save Changes
                            </button>
                         </div>
@@ -163,10 +163,10 @@ export default function Settings() {
                </div>
 
                <div className="mt-6 flex gap-3">
-                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
                      Save System Settings
                   </button>
-                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
                      Reset to Defaults
                   </button>
                </div>
@@ -190,7 +190,7 @@ export default function Settings() {
                         <h3 className="text-sm font-medium text-gray-900">Reset All Data</h3>
                         <p className="text-sm text-gray-600">Permanently delete all inventory data and settings</p>
                      </div>
-                     <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                     <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 cursor-pointer">
                         Reset Data
                      </button>
                   </div>
@@ -200,7 +200,7 @@ export default function Settings() {
                         <h3 className="text-sm font-medium text-gray-900">Delete Account</h3>
                         <p className="text-sm text-gray-600">Permanently delete your account and all associated data</p>
                      </div>
-                     <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                     <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 cursor-pointer">
                         Delete Account
                      </button>
                   </div>

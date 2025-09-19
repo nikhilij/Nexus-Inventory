@@ -100,11 +100,11 @@ export default function Reports() {
                   <p className="text-gray-600">Generate and download business reports</p>
                </div>
                <div className="flex gap-3">
-                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
                      <FiCalendar className="mr-2 h-5 w-5" />
                      Schedule Report
                   </button>
-                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
                      <FiDownload className="mr-2 h-5 w-5" />
                      Generate Report
                   </button>
@@ -172,7 +172,7 @@ export default function Reports() {
                      <h3 className="ml-3 text-lg font-semibold text-gray-900">Sales Reports</h3>
                   </div>
                   <p className="text-gray-600 mb-4">Track revenue, orders, and sales performance</p>
-                  <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                  <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer">
                      Generate Sales Report
                   </button>
                </div>
@@ -185,7 +185,7 @@ export default function Reports() {
                      <h3 className="ml-3 text-lg font-semibold text-gray-900">Inventory Reports</h3>
                   </div>
                   <p className="text-gray-600 mb-4">Monitor stock levels and inventory turnover</p>
-                  <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                  <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 cursor-pointer">
                      Generate Inventory Report
                   </button>
                </div>
@@ -198,7 +198,7 @@ export default function Reports() {
                      <h3 className="ml-3 text-lg font-semibold text-gray-900">Financial Reports</h3>
                   </div>
                   <p className="text-gray-600 mb-4">Analyze revenue, expenses, and profitability</p>
-                  <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
+                  <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 cursor-pointer">
                      Generate Financial Report
                   </button>
                </div>
@@ -241,7 +241,7 @@ export default function Reports() {
                                     {report.status}
                                  </span>
                                  {report.status === "Ready" && (
-                                    <button className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    <button className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
                                        <FiDownload className="mr-2 h-4 w-4" />
                                        Download
                                     </button>

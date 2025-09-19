@@ -82,7 +82,7 @@ export default function Suppliers() {
                   <h1 className="text-2xl font-bold text-gray-900">Suppliers</h1>
                   <p className="text-gray-600">Manage your supplier relationships and contacts</p>
                </div>
-               <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+               <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                   <FiPlus className="mr-2 h-5 w-5" />
                   Add Supplier
                </button>
@@ -140,7 +140,7 @@ export default function Suppliers() {
                         />
                      </div>
                   </div>
-                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                      <FiFilter className="mr-2 h-5 w-5" />
                      Filters
                   </button>
@@ -199,11 +199,11 @@ export default function Suppliers() {
 
                      {/* Actions */}
                      <div className="flex gap-2">
-                        <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
                            <FiEdit className="mr-2 h-4 w-4" />
                            Edit
                         </button>
-                        <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                        <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
                            <FiPackage className="mr-2 h-4 w-4" />
                            Order
                         </button>

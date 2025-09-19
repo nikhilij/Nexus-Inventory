@@ -132,7 +132,7 @@ export default function Header({
                      onOpenSidebar();
                   }}
                   ref={hamburgerRef}
-                  className="p-2 text-gray-300 hover:text-white md:hidden"
+                  className="p-2 text-gray-300 hover:text-white md:hidden cursor-pointer"
                >
                   {mobileOpen ? <FiX size={24} /> : <FiMenu size={24} />}
                </button>
@@ -211,7 +211,7 @@ export default function Header({
                      <button
                         onClick={() => onQuickAction("create_item")}
                         aria-label="Create new item"
-                        className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-full transition-colors"
+                        className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-full transition-colors cursor-pointer"
                      >
                         <FiPlus size={20} />
                      </button>
@@ -222,7 +222,7 @@ export default function Header({
                            aria-haspopup="true"
                            aria-expanded={notifOpen}
                            onClick={() => setNotifOpen((v) => !v)}
-                           className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-full transition-colors"
+                           className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-full transition-colors cursor-pointer"
                         >
                            <FiBell size={20} />
                            {unreadNotifications > 0 && (
@@ -253,7 +253,7 @@ export default function Header({
                            aria-expanded={userOpen}
                            onClick={() => setUserOpen((v) => !v)}
                            aria-label="Open user menu"
-                           className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-800 transition-colors"
+                           className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-800 transition-colors cursor-pointer"
                         >
                            {user?.image ? (
                               <Image
@@ -300,7 +300,7 @@ export default function Header({
                               <button
                                  onClick={() => signOut()}
                                  role="menuitem"
-                                 className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white"
+                                 className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white cursor-pointer"
                               >
                                  Sign Out
                               </button>
@@ -413,7 +413,7 @@ export default function Header({
                         </Link>
                         <button
                            onClick={() => signOut()}
-                           className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-400 hover:text-white hover:bg-red-500"
+                           className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-400 hover:text-white hover:bg-red-500 cursor-pointer"
                         >
                            Sign Out
                         </button>

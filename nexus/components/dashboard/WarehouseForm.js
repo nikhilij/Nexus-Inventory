@@ -16,7 +16,7 @@ export default function WarehouseForm() {
                <label className="block text-sm font-medium mb-2">Capacity</label>
                <input type="text" className="w-full p-2 border rounded" />
             </div>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
                Save Warehouse
             </button>
          </form>

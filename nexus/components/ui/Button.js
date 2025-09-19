@@ -15,7 +15,7 @@ export default function Button({ children, onClick, variant = "primary", size = 
 
    return (
       <button
-         className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+         className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
          onClick={onClick}
          disabled={disabled}
       >

@@ -18,7 +18,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
          <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-4 border-b">
                <h3 className="text-lg font-semibold">{title}</h3>
-               <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+               <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
                   &times;
                </button>
             </div>

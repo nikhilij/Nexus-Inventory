@@ -108,7 +108,7 @@ export default function Orders() {
                   <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
                   <p className="text-gray-600">Manage customer orders and fulfillment</p>
                </div>
-               <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+               <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                   <FiPlus className="mr-2 h-5 w-5" />
                   New Order
                </button>
@@ -178,7 +178,7 @@ export default function Orders() {
                         />
                      </div>
                   </div>
-                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                      <FiFilter className="mr-2 h-5 w-5" />
                      Filters
                   </button>
@@ -248,10 +248,10 @@ export default function Orders() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                  <div className="flex justify-end gap-2">
-                                    <button className="text-indigo-600 hover:text-indigo-900">
+                                    <button className="text-indigo-600 hover:text-indigo-900 cursor-pointer">
                                        <FiEye className="h-5 w-5" />
                                     </button>
-                                    <button className="text-gray-600 hover:text-gray-900">
+                                    <button className="text-gray-600 hover:text-gray-900 cursor-pointer">
                                        <FiEdit className="h-5 w-5" />
                                     </button>
                                  </div>
@@ -277,9 +277,13 @@ export default function Orders() {
                      <button className="px-3 py-1 bg-indigo-600 text-white border border-indigo-600 rounded-md text-sm hover:bg-indigo-700">
                         1
                      </button>
-                     <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">2</button>
-                     <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">3</button>
-                     <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+                     <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 cursor-pointer">
+                        2
+                     </button>
+                     <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 cursor-pointer">
+                        3
+                     </button>
+                     <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 cursor-pointer">
                         Next
                      </button>
                   </div>

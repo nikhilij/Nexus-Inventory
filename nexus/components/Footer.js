@@ -152,7 +152,7 @@ export default function Footer({
                               />
                               <button
                                  type="submit"
-                                 className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-500 transition-colors font-semibold whitespace-nowrap"
+                                 className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-500 transition-colors font-semibold whitespace-nowrap cursor-pointer"
                               >
                                  {newsletterStatus === "loading" ? "Subscribing..." : "Subscribe"}
                               </button>
@@ -242,7 +242,7 @@ export default function Footer({
                   <button
                      onClick={backToTop}
                      aria-label="Back to top"
-                     className="p-2 rounded-full bg-gray-800 hover:bg-indigo-600 text-gray-400 hover:text-white transition-all"
+                     className="p-2 rounded-full bg-gray-800 hover:bg-indigo-600 text-gray-400 hover:text-white transition-all cursor-pointer"
                   >
                      <FiArrowUp size={20} />
                   </button>

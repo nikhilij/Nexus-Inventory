@@ -107,7 +107,7 @@ const Sidebar = ({ isOpen, onToggle, onClose }) => {
                {/* Close button for mobile */}
                <button
                   onClick={onClose}
-                  className="p-2 rounded-md hover:bg-gray-800 transition-colors lg:hidden"
+                  className="p-2 rounded-md hover:bg-gray-800 transition-colors lg:hidden cursor-pointer"
                   aria-label="Close sidebar"
                >
                   <FiX size={20} />
@@ -169,7 +169,7 @@ const Sidebar = ({ isOpen, onToggle, onClose }) => {
             <div className="p-4 border-t border-gray-800">
                <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white rounded-md transition-colors"
+                  className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white rounded-md transition-colors cursor-pointer"
                >
                   <FiLogOut size={18} />
                   <span>Sign Out</span>
