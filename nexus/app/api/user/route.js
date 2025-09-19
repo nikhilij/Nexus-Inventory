@@ -1,17 +1,55 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { getAuthSession } from "@/lib/auth";
+import { userService } from "@/lib/userService";
 
-// Mocked user session for development/demo purposes.
-// Toggle values here to simulate authentication/subscription states.
-const MOCK_USER = {
-  authenticated: true, // change to false to simulate signed-out
-  subscribed: true, // change to false to simulate not subscribed
-  user: {
-    id: 'user_123',
-    name: 'Demo User',
-    email: 'demo@example.com'
-  }
-};
-
+/**
+ * Get the current user information
+ * @returns {Promise<NextResponse>} JSON response with user data
+ */
 export async function GET() {
-  return NextResponse.json(MOCK_USER);
+   // Get the authenticated session
+   const session = await getAuthSession();
+
+   if (!session || !session.user) {
+      return NextResponse.json({
+         authenticated: false,
+         subscribed: false,
+         user: null,
+      });
+   }
+
+   try {
+      // Get the full user profile from the database
+      const user = await userService.getUserByEmail(session.user.email);
+
+      // If no user found in the database, return basic session user
+      if (!user) {
+         return NextResponse.json({
+            authenticated: true,
+            subscribed: false,
+            user: session.user,
+         });
+      }
+
+      return NextResponse.json({
+         authenticated: true,
+         subscribed: !!user.subscription,
+         user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            subscription: user.subscription,
+         },
+      });
+   } catch (error) {
+      console.error("Error fetching user:", error);
+
+      // Return basic session user on error
+      return NextResponse.json({
+         authenticated: true,
+         subscribed: false,
+         user: session.user,
+      });
+   }
 }

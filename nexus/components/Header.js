@@ -5,21 +5,25 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { FiMenu, FiSearch, FiBell, FiUser, FiPlus, FiHelpCircle, FiLogIn, FiUserPlus, FiX } from "react-icons/fi";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Header({
    company = null,
    navItems = [
-      { key: "about", label: "About", href: "/about" },
-      { key: "platform", label: "Platform", href: "/platform" },
-      { key: "services", label: "Services", href: "/services" },
-      { key: "contact", label: "Contact", href: "/contact" },
-      { key: "dashboard", label: "Dashboard", href: "/", protected: true },
-      { key: "products", label: "Products", href: "/products", protected: true },
-      { key: "inventory", label: "Inventory", href: "/inventory", protected: true },
-      { key: "orders", label: "Orders", href: "/orders", protected: true },
-      { key: "suppliers", label: "Suppliers", href: "/suppliers", protected: true },
-      { key: "reports", label: "Reports", href: "/reports", protected: true },
-      { key: "settings", label: "Settings", href: "/settings", protected: true },
+      // Public pages (shown only to non-authenticated users)
+      { key: "about", label: "About", href: "/about", public: true },
+      { key: "platform", label: "Platform", href: "/platform", public: true },
+      { key: "services", label: "Services", href: "/services", public: true },
+      { key: "contact", label: "Contact", href: "/contact", public: true },
+
+      // Subscriber pages (shown only to authenticated users)
+      { key: "dashboard", label: "Dashboard", href: "/dashboard", subscriber: true },
+      { key: "products", label: "Products", href: "/products", subscriber: true },
+      { key: "inventory", label: "Inventory", href: "/inventory", subscriber: true },
+      { key: "orders", label: "Orders", href: "/orders", subscriber: true },
+      { key: "suppliers", label: "Suppliers", href: "/suppliers", subscriber: true },
+      { key: "reports", label: "Reports", href: "/reports", subscriber: true },
+      { key: "settings", label: "Settings", href: "/settings", subscriber: true },
    ],
    unreadNotifications = 0,
    onOpenSidebar = () => {},
@@ -29,9 +33,14 @@ export default function Header({
    onSwitchCompany = () => {},
 }) {
    const { data: session, status } = useSession();
+   const pathname = usePathname();
    const isAuthenticated = status === "authenticated";
    const isLoading = status === "loading";
    const user = session?.user;
+   const sessionCompany = session?.user?.company;
+   const companyName = company?.name ?? sessionCompany?.name;
+   const companyRegistered =
+      company?.isRegistered ?? sessionCompany?.isRegistered ?? !!(company?.id ?? sessionCompany?.id);
    const [mobileOpen, setMobileOpen] = useState(false);
    const [notifOpen, setNotifOpen] = useState(false);
    const [userOpen, setUserOpen] = useState(false);
@@ -39,6 +48,17 @@ export default function Header({
    const searchRef = useRef(null);
    const mobilePanelRef = useRef(null);
    const hamburgerRef = useRef(null);
+
+   // Check if user is on authenticated pages (these use the sidebar layout)
+   const isAuthenticatedPage = [
+      "/dashboard",
+      "/products",
+      "/inventory",
+      "/orders",
+      "/suppliers",
+      "/reports",
+      "/settings",
+   ].includes(pathname);
 
    useEffect(() => {
       if (!isAuthenticated) return;
@@ -94,6 +114,11 @@ export default function Header({
       onSearch(query.trim());
    }
 
+   // If user is authenticated and on an authenticated page, don't show the header navigation
+   if (isAuthenticated && isAuthenticatedPage) {
+      return null;
+   }
+
    return (
       <header role="banner" className="bg-gray-900 text-white shadow-lg sticky top-0 z-50">
          <div className="container mx-auto flex items-center justify-between p-4">
@@ -112,7 +137,7 @@ export default function Header({
                   {mobileOpen ? <FiX size={24} /> : <FiMenu size={24} />}
                </button>
 
-               <Link href="/" aria-label="Home" className="flex items-center gap-2">
+               <Link href={isAuthenticated ? "/dashboard" : "/"} aria-label="Home" className="flex items-center gap-2">
                   {company?.logoUrl ? (
                      <Image src={company.logoUrl} alt="Nexus Logo" width={32} height={32} className="rounded-full" />
                   ) : (
@@ -123,14 +148,30 @@ export default function Header({
                   <strong className="text-xl font-bold hidden sm:inline">Nexus</strong>
                </Link>
 
-               <div className="company-name text-sm text-gray-400 hidden lg:block">
-                  {isLoading ? "Loading..." : (company?.name ?? "Your Company")}
-               </div>
+               {isAuthenticated && companyName && companyRegistered && (
+                  <div className="company-name text-sm text-gray-400 hidden lg:block">
+                     {isLoading ? "Loading..." : companyName}
+                  </div>
+               )}
             </div>
 
             <nav role="navigation" aria-label="Primary" className="hidden md:flex items-center gap-2">
                {navItems
-                  .filter((i) => !(i.protected && !isAuthenticated))
+                  .filter((item) => {
+                     // Show public pages only to non-authenticated users
+                     if (item.public && isAuthenticated) {
+                        return false;
+                     }
+                     // Show subscriber pages only to authenticated users (but not on authenticated pages)
+                     if (item.subscriber && !isAuthenticated) {
+                        return false;
+                     }
+                     // Show protected pages only to authenticated users (legacy support)
+                     if (item.protected && !isAuthenticated) {
+                        return false;
+                     }
+                     return true;
+                  })
                   .map((item) => (
                      <Link
                         key={item.key}
@@ -146,7 +187,7 @@ export default function Header({
             <div className="flex items-center gap-4">
                {isAuthenticated && (
                   <form role="search" onSubmit={submitSearch} className="relative hidden lg:block">
-                     <label htmlFor="header-search" className="visually-hidden">
+                     <label htmlFor="header-search" className="sr-only">
                         Search
                      </label>
                      <input
@@ -305,7 +346,21 @@ export default function Header({
             >
                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                   {navItems
-                     .filter((i) => !(i.protected && !isAuthenticated))
+                     .filter((item) => {
+                        // Show public pages only to non-authenticated users
+                        if (item.public && isAuthenticated) {
+                           return false;
+                        }
+                        // Show subscriber pages only to authenticated users (but not on authenticated pages)
+                        if (item.subscriber && !isAuthenticated) {
+                           return false;
+                        }
+                        // Show protected pages only to authenticated users (legacy support)
+                        if (item.protected && !isAuthenticated) {
+                           return false;
+                        }
+                        return true;
+                     })
                      .map((item) => (
                         <Link
                            key={item.key}

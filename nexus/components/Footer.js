@@ -12,36 +12,36 @@ export default function Footer({
       {
          title: "Product",
          links: [
-            { label: "Platform", href: "/platform" },
-            { label: "Pricing", href: "/pricing" },
-            { label: "Demo", href: "/demo" },
-            { label: "Integrations", href: "/integrations" },
+            { label: "Platform", href: "/platform", public: true },
+            { label: "Pricing", href: "/pricing", public: true },
+            { label: "Demo", href: "/demo", public: true },
+            { label: "Integrations", href: "/integrations", public: true },
          ],
       },
       {
          title: "Company",
          links: [
-            { label: "About Us", href: "/about" },
-            { label: "Careers", href: "/careers" },
-            { label: "Blog", href: "/blog" },
-            { label: "Contact Us", href: "/contact" },
+            { label: "About Us", href: "/about", public: true },
+            { label: "Careers", href: "/careers", public: true },
+            { label: "Blog", href: "/blog", public: true },
+            { label: "Contact Us", href: "/contact", public: true },
          ],
       },
       {
          title: "Resources",
          links: [
-            { label: "Documentation", href: "/docs" },
-            { label: "API Reference", href: "/api" },
-            { label: "Tutorials", href: "/tutorials" },
-            { label: "Status", href: "/status" },
+            { label: "Documentation", href: "/docs", public: true },
+            { label: "API Reference", href: "/api", public: true },
+            { label: "Tutorials", href: "/tutorials", public: true },
+            { label: "Status", href: "/status", public: true },
          ],
       },
       {
          title: "Legal",
          links: [
-            { label: "Privacy Policy", href: "/privacy" },
-            { label: "Terms of Service", href: "/terms" },
-            { label: "Cookie Policy", href: "/cookies" },
+            { label: "Privacy Policy", href: "/privacy", public: true },
+            { label: "Terms of Service", href: "/terms", public: true },
+            { label: "Cookie Policy", href: "/cookies", public: true },
          ],
       },
    ],
@@ -110,7 +110,11 @@ export default function Footer({
          <div className="container mx-auto px-6 py-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                <div className="col-span-1 md:col-span-2 lg:col-span-1">
-                  <Link href="/" aria-label={`${siteMeta.name} home`} className="flex items-center gap-2 mb-4">
+                  <Link
+                     href={isAuthenticated ? "/dashboard" : "/"}
+                     aria-label={`${siteMeta.name} home`}
+                     className="flex items-center gap-2 mb-4"
+                  >
                      {siteMeta.logoUrl ? (
                         <Image
                            src={siteMeta.logoUrl}
@@ -176,25 +180,41 @@ export default function Footer({
                   </div>
                </div>
 
-               {navGroups.map((group) => (
-                  <div key={group.title}>
-                     <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                        {group.title}
-                     </h4>
-                     <ul className="space-y-3">
-                        {group.links.map((link) => (
-                           <li key={link.href + link.label}>
-                              <Link
-                                 href={link.href}
-                                 className="text-gray-300 hover:text-white hover:underline transition-colors"
-                              >
-                                 {link.label}
-                              </Link>
-                           </li>
-                        ))}
-                     </ul>
-                  </div>
-               ))}
+               {navGroups
+                  .filter((group) => {
+                     // Filter out groups that have only public links for authenticated users
+                     if (isAuthenticated) {
+                        return group.links.some((link) => !link.public);
+                     }
+                     return true;
+                  })
+                  .map((group) => (
+                     <div key={group.title}>
+                        <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                           {group.title}
+                        </h4>
+                        <ul className="space-y-3">
+                           {group.links
+                              .filter((link) => {
+                                 // Show public links only to non-authenticated users
+                                 if (link.public && isAuthenticated) {
+                                    return false;
+                                 }
+                                 return true;
+                              })
+                              .map((link) => (
+                                 <li key={link.href + link.label}>
+                                    <Link
+                                       href={link.href}
+                                       className="text-gray-300 hover:text-white hover:underline transition-colors"
+                                    >
+                                       {link.label}
+                                    </Link>
+                                 </li>
+                              ))}
+                        </ul>
+                     </div>
+                  ))}
             </div>
 
             <div className="mt-12 border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between">

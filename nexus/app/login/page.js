@@ -20,11 +20,11 @@ export default function LoginPage() {
       setIsLoading(true);
       setError(null);
       try {
-         const result = await signIn("google", { redirect: false, callbackUrl: "/" });
+         const result = await signIn("google", { redirect: false, callbackUrl: "/verify-pin" });
          if (result?.error) {
             setError(result.error === "Callback" ? "Sign in failed. Please try again." : result.error);
          } else if (result?.ok) {
-            router.push(result.url || "/");
+            router.push("/verify-pin");
          }
       } catch (err) {
          setError("An unexpected error occurred during sign-in.");
@@ -47,7 +47,7 @@ export default function LoginPage() {
       if (result?.error) {
          setError("Invalid email or password. Please try again.");
       } else if (result?.ok) {
-         router.push("/");
+         router.push("/verify-pin");
       }
 
       setIsLoading(false);

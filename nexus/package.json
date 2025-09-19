@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:pin": "node test-pin-verification.js",
+    "test:nav": "node test-navigation-behavior.js"
   },
   "dependencies": {
     "mongodb": "^6.20.0",
