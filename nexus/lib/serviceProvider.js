@@ -71,12 +71,12 @@ const serviceProvider = {
    getSettingsService() {
       return {
          getSettings: async () => {
-            // TODO: Implement settings service
-            return {};
+            const { settingsService } = await import("../lib/settingsService");
+            return settingsService.getSettings();
          },
          updateSettings: async (data) => {
-            // TODO: Implement settings service
-            return data;
+            const { settingsService } = await import("../lib/settingsService");
+            return settingsService.updateSettings(data);
          },
       };
    },
@@ -85,24 +85,24 @@ const serviceProvider = {
    getWarehouseService() {
       return {
          listWarehouses: async () => {
-            // TODO: Implement warehouse service
-            return [];
+            const { WarehouseService } = await import("../services/WarehouseService");
+            return WarehouseService.listWarehouses();
          },
          getWarehouse: async (id) => {
-            // TODO: Implement warehouse service
-            return null;
+            const { WarehouseService } = await import("../services/WarehouseService");
+            return WarehouseService.getWarehouse(id);
          },
          createWarehouse: async (data) => {
-            // TODO: Implement warehouse service
-            return data;
+            const { WarehouseService } = await import("../services/WarehouseService");
+            return WarehouseService.createWarehouse(data);
          },
          updateWarehouse: async (id, data) => {
-            // TODO: Implement warehouse service
-            return data;
+            const { WarehouseService } = await import("../services/WarehouseService");
+            return WarehouseService.updateWarehouse(id, data);
          },
          deleteWarehouse: async (id) => {
-            // TODO: Implement warehouse service
-            return true;
+            const { WarehouseService } = await import("../services/WarehouseService");
+            return WarehouseService.deleteWarehouse(id);
          },
       };
    },
@@ -111,11 +111,13 @@ const serviceProvider = {
    getProfileService() {
       return {
          getProfile: async () => {
-            // TODO: Implement profile service
+            const { userService } = await import("../lib/userService");
+            // TODO: Implement proper profile service
             return {};
          },
          updateProfile: async (data) => {
-            // TODO: Implement profile service
+            const { userService } = await import("../lib/userService");
+            // TODO: Implement proper profile service
             return data;
          },
       };

@@ -1,5 +1,6 @@
 // services/TenantService.js
 import { Tenant, TenantConfig, TenantUser, TenantDomain } from "../models/index.js";
+import { User, Product, Order, InventoryItem } from "../models/index.js";
 import * as NotificationService from "./NotificationService.js";
 
 class TenantService {
@@ -285,28 +286,83 @@ class TenantService {
          throw new Error("Tenant not found");
       }
 
-      // In a real implementation, query actual tenant data
-      // For now, return mock statistics
+      // Get real statistics from database
+      const [
+         totalUsers,
+         activeUsers,
+         suspendedUsers,
+         totalProducts,
+         activeProducts,
+         discontinuedProducts,
+         totalOrders,
+         thisMonthOrders,
+         pendingOrders,
+         totalInventoryValue,
+      ] = await Promise.all([
+         // User statistics
+         TenantUser.countDocuments({ tenant: tenantId }),
+         TenantUser.countDocuments({ tenant: tenantId, status: "active" }),
+         TenantUser.countDocuments({ tenant: tenantId, status: "suspended" }),
+
+         // Product statistics
+         Product.countDocuments({ tenant: tenantId }),
+         Product.countDocuments({ tenant: tenantId, status: "active" }),
+         Product.countDocuments({ tenant: tenantId, status: "discontinued" }),
+
+         // Order statistics
+         Order.countDocuments({ tenant: tenantId }),
+         Order.countDocuments({
+            tenant: tenantId,
+            createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+         }),
+         Order.countDocuments({ tenant: tenantId, status: "pending" }),
+
+         // Inventory value (sum of all inventory items' value)
+         InventoryItem.aggregate([
+            { $match: { tenant: tenantId } },
+            {
+               $lookup: {
+                  from: "products",
+                  localField: "product",
+                  foreignField: "_id",
+                  as: "product",
+               },
+            },
+            { $unwind: "$product" },
+            {
+               $group: {
+                  _id: null,
+                  totalValue: {
+                     $sum: { $multiply: ["$quantity", "$product.price"] },
+                  },
+               },
+            },
+         ]).then((result) => result[0]?.totalValue || 0),
+      ]);
+
       const stats = {
          users: {
-            total: 25,
-            active: 22,
-            suspended: 3,
+            total: totalUsers,
+            active: activeUsers,
+            suspended: suspendedUsers,
          },
          products: {
-            total: 1500,
-            active: 1450,
-            discontinued: 50,
+            total: totalProducts,
+            active: activeProducts,
+            discontinued: discontinuedProducts,
          },
          orders: {
-            total: 320,
-            thisMonth: 45,
-            pending: 12,
+            total: totalOrders,
+            thisMonth: thisMonthOrders,
+            pending: pendingOrders,
          },
-         storage: {
-            used: 45, // MB
-            limit: tenant.settings.maxStorage,
-            percentage: (45 / tenant.settings.maxStorage) * 100,
+         inventory: {
+            totalValue: totalInventoryValue,
+            // Storage calculation would need actual file storage tracking
+            // For now, we'll use a placeholder
+            used: 0, // This would need to be calculated from actual file storage
+            limit: tenant.settings?.maxStorage || 100, // MB
+            percentage: 0, // This would need to be calculated from actual usage
          },
       };
 

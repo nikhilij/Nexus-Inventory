@@ -41,24 +41,53 @@ class SupplierService {
          throw new Error("Supplier not found");
       }
 
-      // In a real implementation, this would connect to supplier's API
-      // For now, simulate catalog sync
-      const mockProducts = [
-         { name: "Product A", sku: "SUP-A-001", price: 10.99 },
-         { name: "Product B", sku: "SUP-B-002", price: 15.5 },
-         { name: "Product C", sku: "SUP-C-003", price: 8.75 },
-      ];
+      // Connect to supplier's API based on their integration type
+      let products = [];
+      try {
+         switch (supplier.integrationType) {
+            case "api":
+               products = await this.syncViaAPI(supplier);
+               break;
+            case "ftp":
+               products = await this.syncViaFTP(supplier);
+               break;
+            case "webhook":
+               products = await this.syncViaWebhook(supplier);
+               break;
+            default:
+               throw new Error(`Unsupported integration type: ${supplier.integrationType}`);
+         }
+      } catch (error) {
+         console.error(`Failed to sync catalog for supplier ${supplier.name}:`, error);
+         throw new Error(`Catalog sync failed: ${error.message}`);
+      }
 
       const syncedProducts = [];
-      for (const productData of mockProducts) {
-         const supplierProduct = new SupplierProduct({
+      for (const productData of products) {
+         // Check if product already exists
+         const existingProduct = await SupplierProduct.findOne({
             supplier: supplierId,
-            ...productData,
-            lastSynced: new Date(),
+            sku: productData.sku,
          });
 
-         await supplierProduct.save();
-         syncedProducts.push(supplierProduct);
+         if (existingProduct) {
+            // Update existing product
+            existingProduct.name = productData.name;
+            existingProduct.price = productData.price;
+            existingProduct.description = productData.description;
+            existingProduct.lastSynced = new Date();
+            await existingProduct.save();
+            syncedProducts.push(existingProduct);
+         } else {
+            // Create new product
+            const supplierProduct = new SupplierProduct({
+               supplier: supplierId,
+               ...productData,
+               lastSynced: new Date(),
+            });
+            await supplierProduct.save();
+            syncedProducts.push(supplierProduct);
+         }
       }
 
       // Update supplier's last sync time
@@ -69,7 +98,49 @@ class SupplierService {
          supplier: supplier.name,
          syncedProducts: syncedProducts.length,
          products: syncedProducts,
+         integrationType: supplier.integrationType,
       };
+   }
+
+   // Sync via REST API
+   async syncViaAPI(supplier) {
+      const response = await fetch(supplier.apiEndpoint, {
+         method: "GET",
+         headers: {
+            Authorization: `Bearer ${supplier.apiKey}`,
+            "Content-Type": "application/json",
+         },
+      });
+
+      if (!response.ok) {
+         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Transform supplier's product format to our format
+      return data.products.map((product) => ({
+         name: product.name || product.title,
+         sku: product.sku || product.id,
+         price: parseFloat(product.price),
+         description: product.description || "",
+         category: product.category || "",
+         stockQuantity: product.stock || 0,
+      }));
+   }
+
+   // Sync via FTP (placeholder implementation)
+   async syncViaFTP(supplier) {
+      // In a real implementation, this would connect to FTP server
+      // and parse CSV/XML files containing product data
+      throw new Error("FTP sync not yet implemented");
+   }
+
+   // Sync via webhook (placeholder implementation)
+   async syncViaWebhook(supplier) {
+      // In a real implementation, this would trigger a webhook
+      // and wait for the supplier to send product data
+      throw new Error("Webhook sync not yet implemented");
    }
 
    // Get supplier performance metrics

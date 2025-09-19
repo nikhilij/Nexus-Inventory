@@ -1,5 +1,6 @@
 // services/ReportingService.js
 import { Report, ScheduledReport, ReportData } from "../models/index.js";
+import { Order, Product, InventoryItem, User, Transaction } from "../models/index.js";
 import * as NotificationService from "./NotificationService.js";
 
 class ReportingService {
