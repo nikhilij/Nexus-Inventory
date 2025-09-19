@@ -2,23 +2,40 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { 
+  HiMenu, 
+  HiX, 
+  HiSearch, 
+  HiBell, 
+  HiUser, 
+  HiChevronDown,
+  HiLogout,
+  HiCog,
+  HiHome,
+  HiCube,
+  HiClipboardList,
+  HiTruck,
+  HiChartBar,
+  HiSparkles
+} from "react-icons/hi";
+import { HiMagnifyingGlass, HiCommandLine } from "react-icons/hi2";
 
 export default function Header({
     user = null,
     company = null,
     // Default nav includes public items first, app pages are marked `protected`
     navItems = [
-        { key: 'about', label: 'About', href: '/about' },
-        { key: 'platform', label: 'Platform', href: '/platform' },
-        { key: 'services', label: 'Services', href: '/services' },
-        { key: 'contact', label: 'Contact', href: '/contact' },
-        { key: 'dashboard', label: 'Dashboard', href: '/', protected: true },
-        { key: 'products', label: 'Products', href: '/products', protected: true },
-        { key: 'inventory', label: 'Inventory', href: '/inventory', protected: true },
-        { key: 'orders', label: 'Orders', href: '/orders', protected: true },
-        { key: 'suppliers', label: 'Suppliers', href: '/suppliers', protected: true },
-        { key: 'reports', label: 'Reports', href: '/reports', protected: true },
-        { key: 'settings', label: 'Settings', href: '/settings', protected: true },
+        { key: 'about', label: 'About', href: '/about', icon: HiSparkles },
+        { key: 'platform', label: 'Platform', href: '/platform', icon: HiCube },
+        { key: 'services', label: 'Services', href: '/services', icon: HiTruck },
+        { key: 'contact', label: 'Contact', href: '/contact', icon: HiUser },
+        { key: 'dashboard', label: 'Dashboard', href: '/', protected: true, icon: HiHome },
+        { key: 'products', label: 'Products', href: '/products', protected: true, icon: HiCube },
+        { key: 'inventory', label: 'Inventory', href: '/inventory', protected: true, icon: HiClipboardList },
+        { key: 'orders', label: 'Orders', href: '/orders', protected: true, icon: HiTruck },
+        { key: 'suppliers', label: 'Suppliers', href: '/suppliers', protected: true, icon: HiUser },
+        { key: 'reports', label: 'Reports', href: '/reports', protected: true, icon: HiChartBar },
+        { key: 'settings', label: 'Settings', href: '/settings', protected: true, icon: HiCog },
     ],
     unreadNotifications = 0,
     onSignOut = () => { },
@@ -94,126 +111,247 @@ export default function Header({
     }
 
     return (
-        <header role="banner" className="site-header">
-
-            <div className="header-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <header role="banner" className="relative z-50 bg-gradient-to-r from-slate-50 via-white to-slate-50 border-b border-slate-200/80 backdrop-blur-xl shadow-sm">
+            {/* Background Animation */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 via-purple-50/20 to-teal-50/30 animate-gradient-x"></div>
+            
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
                 {/* Left side */}
-                <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="flex items-center gap-4">
                     <button
                         aria-label="Open menu"
                         aria-expanded={mobileOpen}
                         aria-controls="mobile-nav"
                         onClick={() => { setMobileOpen(v => !v); onOpenSidebar(); }}
                         ref={hamburgerRef}
+                        className="p-2 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-slate-700 hover:text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:hidden shadow-sm"
                     >
-                        ☰
+                        {mobileOpen ? (
+                            <HiX className="w-5 h-5" />
+                        ) : (
+                            <HiMenu className="w-5 h-5" />
+                        )}
                     </button>
 
-                    <Link href="/" aria-label="Home" className="logo-link">
-                        <div className="logo" aria-hidden>{company?.logoUrl ? <img src={company.logoUrl} alt="" style={{ height: 24 }} /> : <strong>Nexus</strong>}</div>
+                    <Link href="/" aria-label="Home" className="flex items-center group">
+                        <div className="flex items-center space-x-3">
+                            <div className="relative">
+                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-teal-600 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                                    <HiSparkles className="w-4 h-4 text-white animate-pulse" />
+                                </div>
+                                <div className="absolute inset-0 w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-teal-600 opacity-20 blur-md group-hover:opacity-40 transition-opacity duration-300"></div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent">
+                                    Nexus
+                                </span>
+                                <span className="text-xs text-slate-500 -mt-1">Inventory</span>
+                            </div>
+                        </div>
                     </Link>
 
-                    <div className="company-name" aria-live="polite">
-                        {isLoading ? 'Loading company…' : (company?.name ?? 'Company')}
-                    </div>
-
-                    {/* optional env badge */}
+                    {company?.name && (
+                        <div className="ml-2 px-3 py-1 rounded-full bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200/50 text-sm font-medium text-slate-700 shadow-sm" aria-live="polite">
+                            {isLoading ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-slate-300 animate-pulse"></div>
+                                    <span className="text-slate-500">Loading...</span>
+                                </div>
+                            ) : (
+                                company.name
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                {/* Center */}
-                <div className="header-center" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <nav role="navigation" aria-label="Primary" className="primary-nav">
-                        <ul style={{ display: 'flex', gap: 8, listStyle: 'none', margin: 0, padding: 0 }}>
+                {/* Center Navigation */}
+                <div className="flex-1 flex items-center justify-center gap-8">
+                    <nav role="navigation" aria-label="Primary" className="hidden lg:block">
+                        <ul className="flex items-center gap-1 list-none m-0 p-0">
                             {navItems.filter(i => !(i.protected && !isAuthenticated)).map(item => (
                                 <li key={item.key}>
-                                    <Link href={item.href || '#'} onClick={() => onNavSelect(item.key)}>{item.label}</Link>
+                                    <Link
+                                        href={item.href || '#'}
+                                        onClick={() => onNavSelect(item.key)}
+                                        className="group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 transform hover:scale-105"
+                                    >
+                                        {item.icon && (
+                                            <item.icon className="w-4 h-4 group-hover:text-blue-600 transition-colors duration-200" />
+                                        )}
+                                        <span>{item.label}</span>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
                     </nav>
 
                     {isAuthenticated && (
-                        <form role="search" onSubmit={submitSearch} className="search-form" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <label htmlFor="header-search" className="visually-hidden">Search</label>
+                        <form role="search" onSubmit={submitSearch} className="hidden md:flex items-center gap-2 bg-gradient-to-r from-slate-50 to-white border border-slate-200/80 rounded-xl px-4 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-300 transition-all duration-200 shadow-sm hover:shadow-md min-w-[300px]">
+                            <HiMagnifyingGlass className="w-4 h-4 text-slate-400" />
                             <input
                                 id="header-search"
                                 ref={searchRef}
                                 type="search"
-                                placeholder="Search"
+                                placeholder="Search products, orders, suppliers..."
                                 value={query}
                                 onChange={e => setQuery(e.target.value)}
                                 aria-label="Search"
+                                className="flex-1 bg-transparent outline-none text-sm text-slate-700 placeholder-slate-400"
                             />
-                            <button type="submit" aria-label="Submit search">🔍</button>
+                            <div className="flex items-center gap-1 text-xs text-slate-400">
+                                <HiCommandLine className="w-3 h-3" />
+                                <span>/</span>
+                            </div>
                         </form>
                     )}
                 </div>
 
                 {/* Right side */}
-                <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {/* Right side controls: show quick-actions, notifications and user menu only to authenticated users */}
+                <div className="flex items-center gap-3">
                     {isAuthenticated ? (
                         <>
-                            <div className="quick-actions">
-                                <button onClick={() => onQuickAction('create_product')} aria-label="Create product">+ Product</button>
-                                <button onClick={() => onQuickAction('create_order')} aria-label="Create purchase order">+ PO</button>
+                            <div className="hidden sm:flex items-center gap-2">
+                                <button
+                                    onClick={() => onQuickAction('create_product')}
+                                    aria-label="Create product"
+                                    className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                                >
+                                    <HiCube className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+                                    <span>Product</span>
+                                </button>
+                                <button
+                                    onClick={() => onQuickAction('create_order')}
+                                    aria-label="Create purchase order"
+                                    className="group flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-gradient-to-r from-white to-slate-50 text-slate-700 text-sm font-medium hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 transform hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
+                                >
+                                    <HiClipboardList className="w-4 h-4 group-hover:text-blue-600 transition-colors duration-200" />
+                                    <span>Order</span>
+                                </button>
                             </div>
 
-                            <div className="notifications">
-                                <button aria-label={`Notifications (${unreadNotifications})`} aria-haspopup="true" aria-expanded={notifOpen} onClick={() => setNotifOpen(v => !v)}>
-                                    🔔 {unreadNotifications > 0 ? <span className="badge" aria-live="polite">{unreadNotifications}</span> : null}
+                            <div className="relative">
+                                <button
+                                    aria-label={`Notifications (${unreadNotifications})`}
+                                    aria-haspopup="true"
+                                    aria-expanded={notifOpen}
+                                    onClick={() => setNotifOpen(v => !v)}
+                                    className="relative p-3 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-200/50 hover:from-slate-100 hover:to-slate-50 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                >
+                                    <HiBell className="w-5 h-5 text-slate-600" />
+                                    {unreadNotifications > 0 && (
+                                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-full animate-pulse shadow-lg" aria-live="polite">
+                                            {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                                        </span>
+                                    )}
                                 </button>
                                 {notifOpen && (
-                                    <div role="dialog" aria-label="Notifications" className="notif-dropdown">
-                                        <div style={{ padding: 8 }}>You have {unreadNotifications} unread notifications</div>
-                                        <Link href="/notifications">View all</Link>
+                                    <div role="dialog" aria-label="Notifications" className="absolute right-0 mt-2 w-80 bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-2xl shadow-xl py-4 z-50">
+                                        <div className="px-4 py-2 border-b border-slate-100">
+                                            <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+                                        </div>
+                                        <div className="px-4 py-3">
+                                            <div className="text-sm text-slate-600 mb-2">
+                                                {unreadNotifications > 0 ? `${unreadNotifications} unread notifications` : 'No new notifications'}
+                                            </div>
+                                            <Link href="/notifications" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                                View all notifications →
+                                            </Link>
+                                        </div>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="user-menu">
-                                <button aria-haspopup="true" aria-expanded={userOpen} onClick={() => setUserOpen(v => !v)} aria-label="Open user menu">
-                                    {user?.avatarUrl ? <img src={user.avatarUrl} alt="" style={{ height: 28, width: 28, borderRadius: '50%' }} /> : <span className="avatar-placeholder" aria-hidden>{user ? user.name?.[0] : 'U'}</span>}
+                            <div className="relative">
+                                <button
+                                    aria-haspopup="true"
+                                    aria-expanded={userOpen}
+                                    onClick={() => setUserOpen(v => !v)}
+                                    aria-label="Open user menu"
+                                    className="flex items-center gap-2 p-2 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-200/50 hover:from-slate-100 hover:to-slate-50 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                >
+                                    {user?.avatarUrl ? (
+                                        <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-lg object-cover ring-2 ring-slate-200" />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm">
+                                            {user ? user.name?.[0] : <HiUser className="w-4 h-4" />}
+                                        </div>
+                                    )}
+                                    <HiChevronDown className="w-4 h-4 text-slate-500" />
                                 </button>
+
                                 {userOpen && (
-                                    <ul role="menu" className="user-dropdown">
-                                        <li role="menuitem"><Link href="/account">Account</Link></li>
-                                        <li role="menuitem"><Link href="/profile">Profile</Link></li>
-                                        <li role="menuitem"><button onClick={() => onSwitchCompany('')}>Switch company</button></li>
-                                        <li role="menuitem"><button onClick={onSignOut}>Sign out</button></li>
+                                    <ul role="menu" className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-2xl shadow-xl py-2 z-50">
+                                        <li role="menuitem">
+                                            <Link href="/account" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-slate-900 transition-all duration-200">
+                                                <HiUser className="w-4 h-4" />
+                                                <span>Account Settings</span>
+                                            </Link>
+                                        </li>
+                                        <li role="menuitem">
+                                            <Link href="/settings" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-slate-900 transition-all duration-200">
+                                                <HiCog className="w-4 h-4" />
+                                                <span>Preferences</span>
+                                            </Link>
+                                        </li>
+                                        <hr className="my-2 border-slate-100" />
+                                        <li role="menuitem">
+                                            <button onClick={onSignOut} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200">
+                                                <HiLogout className="w-4 h-4" />
+                                                <span>Sign Out</span>
+                                            </button>
+                                        </li>
                                     </ul>
                                 )}
                             </div>
                         </>
                     ) : (
-                        // Public users: show help + auth CTAs
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div className="help">
-                                <Link href="/docs" aria-label="Help and documentation">❓</Link>
-                            </div>
-                            <div className="auth-ctas">
-                                <Link href="/login"><button>Sign in</button></Link>
-                                <Link href="/signup"><button>Sign up</button></Link>
-                            </div>
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/login"
+                                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors duration-200"
+                            >
+                                Sign In
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                            >
+                                Sign Up
+                            </Link>
                         </div>
                     )}
                 </div>
-            </div>
-
             {/* Mobile nav panel */}
             {mobileOpen && (
-                <div id="mobile-nav" ref={mobilePanelRef} className="mobile-panel" role="dialog" aria-label="Mobile menu">
+                <div id="mobile-nav" ref={mobilePanelRef} className="lg:hidden absolute inset-x-0 top-full bg-white/95 backdrop-blur-xl border-t border-slate-200/80 shadow-xl" role="dialog" aria-label="Mobile menu">
                     <nav role="navigation" aria-label="Mobile Primary">
-                        <ul style={{ listStyle: 'none', padding: 8 }}>
+                        <ul className="list-none p-6 space-y-3">
                             {navItems.filter(i => !(i.protected && !isAuthenticated)).map(item => (
                                 <li key={item.key}>
-                                    <Link href={item.href || '#'} onClick={() => { onNavSelect(item.key); setMobileOpen(false); }}>{item.label}</Link>
+                                    <Link
+                                        href={item.href || '#'}
+                                        onClick={() => { onNavSelect(item.key); setMobileOpen(false); }}
+                                        className="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-slate-900 transition-all duration-200"
+                                    >
+                                        {item.icon && (
+                                            <item.icon className="w-5 h-5 group-hover:text-blue-600 transition-colors duration-200" />
+                                        )}
+                                        <span className="font-medium">{item.label}</span>
+                                    </Link>
                                 </li>
                             ))}
                             {!isAuthenticated && (
                                 <>
-                                    <li><Link href="/login" onClick={() => setMobileOpen(false)}>Sign in</Link></li>
-                                    <li><Link href="/signup" onClick={() => setMobileOpen(false)}>Sign up</Link></li>
+                                    <li>
+                                        <Link href="/login" onClick={() => setMobileOpen(false)} className="block px-4 py-3 rounded-xl text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-slate-900 transition-all duration-200 font-medium">
+                                            Sign in
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/signup" onClick={() => setMobileOpen(false)} className="block px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg">
+                                            Sign up
+                                        </Link>
+                                    </li>
                                 </>
                             )}
                         </ul>
@@ -221,21 +359,41 @@ export default function Header({
 
                     {isAuthenticated && (
                         <>
-                            <div style={{ padding: 8 }}>
-                                <div>Quick actions</div>
-                                <button onClick={() => onQuickAction('create_product')}>+ Product</button>
-                                <button onClick={() => onQuickAction('create_order')}>+ PO</button>
+                            <div className="px-6 py-4 border-t border-slate-100 space-y-3">
+                                <div className="text-sm font-semibold text-slate-900">Quick actions</div>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={() => onQuickAction('create_product')} 
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg"
+                                    >
+                                        <HiCube className="w-4 h-4" />
+                                        Product
+                                    </button>
+                                    <button 
+                                        onClick={() => onQuickAction('create_order')} 
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium hover:bg-slate-50 transition-all duration-200"
+                                    >
+                                        <HiClipboardList className="w-4 h-4" />
+                                        Order
+                                    </button>
+                                </div>
                             </div>
 
-                            <div style={{ padding: 8 }}>
-                                <div>Account</div>
-                                <Link href="/profile">Profile</Link>
-                                <button onClick={onSignOut}>Sign out</button>
+                            <div className="px-6 py-4 border-t border-slate-100 space-y-3">
+                                <div className="text-sm font-semibold text-slate-900">Account</div>
+                                <Link href="/account" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 text-sm text-slate-700 hover:text-slate-900 transition-colors duration-200">
+                                    <HiUser className="w-4 h-4" />
+                                    Profile & Settings
+                                </Link>
+                                <button onClick={onSignOut} className="flex items-center gap-3 text-sm text-red-600 hover:text-red-700 transition-colors duration-200">
+                                    <HiLogout className="w-4 h-4" />
+                                    Sign out
+                                </button>
                             </div>
                         </>
                     )}
                 </div>
-            )}
+            </div>
         </header>
     );
 }

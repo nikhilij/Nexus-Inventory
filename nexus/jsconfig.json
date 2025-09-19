@@ -3,5 +3,9 @@
     "paths": {
       "@/*": ["./*"]
     }
+  },
+  "typeAcquisition": {
+    "enable": true,
+    "include": ["estree", "json-schema"]
   }
 }

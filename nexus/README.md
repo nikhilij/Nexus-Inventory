@@ -270,3 +270,27 @@ type Product = {
 
 **Happy Building!**  
 *For questions or customizations, create issues or use the team communication channels.*
+
+---
+
+## Quick setup: Google OAuth (NextAuth)
+
+1. Install NextAuth in the `nexus` package:
+
+  ```bash
+  cd nexus
+  npm install next-auth
+  ```
+
+2. Copy `.env.local.example` to `.env.local` and set real secrets. The example includes the client id you shared, but do NOT commit `.env.local`.
+
+3. Start the dev server:
+
+  ```bash
+  npm run dev
+  ```
+
+4. The app includes a NextAuth route at `/api/auth/[...nextauth]` and the login page will call `signIn('google')`. After sign-in NextAuth will redirect to `/subscriber`.
+
+Security note: never commit client secrets to the repo. Use environment variables or a secrets manager for production.
+

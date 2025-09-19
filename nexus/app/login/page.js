@@ -2,6 +2,7 @@
 
 import {useState} from 'react';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 
 export default function LoginPage(){
   const [method, setMethod] = useState('password');
@@ -56,9 +57,9 @@ export default function LoginPage(){
       <section aria-label="social logins" style={{marginBottom:12}}>
         <p>Sign in with</p>
         <div style={{display:'flex',gap:8}}>
-          <a href="/api/auth/google"><button>Continue with Google</button></a>
-          <a href="/api/auth/github"><button>Continue with GitHub</button></a>
+          <button onClick={() => signIn('google', { callbackUrl: '/subscriber' })}>Continue with Google</button>
         </div>
+        <p style={{marginTop:8,fontSize:12,color:'#666'}}>Note: Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `NEXTAUTH_SECRET` in your `.env.local` before using Google sign-in.</p>
       </section>
 
       <section aria-labelledby="methods-heading">
