@@ -209,7 +209,6 @@ invoiceSchema.index({ dueDate: 1 });
 invoiceSchema.index({ issueDate: -1 });
 invoiceSchema.index({ totalAmount: -1 });
 invoiceSchema.index({ amountDue: -1 });
-invoiceSchema.index({ invoiceNumber: 1 }, { unique: true });
 
 // Compound indexes
 invoiceSchema.index({ organization: 1, status: 1 });

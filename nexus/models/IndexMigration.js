@@ -144,11 +144,11 @@ const indexMigrationSchema = new mongoose.Schema(
       timestamps: true,
       toJSON: { virtuals: true },
       toObject: { virtuals: true },
+      suppressReservedKeysWarning: true,
    }
 );
 
 // Indexes
-indexMigrationSchema.index({ name: 1 }, { unique: true });
 indexMigrationSchema.index({ version: 1 }, { unique: true });
 indexMigrationSchema.index({ status: 1 });
 indexMigrationSchema.index({ type: 1 });

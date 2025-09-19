@@ -74,7 +74,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // Indexes for performance
-userSchema.index({ email: 1 });
 userSchema.index({ organization: 1 });
 userSchema.index({ status: 1 });
 userSchema.index({ "preferences.theme": 1 });

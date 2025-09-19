@@ -171,7 +171,6 @@ const productSchema = new mongoose.Schema(
 );
 
 // Indexes
-productSchema.index({ sku: 1 });
 productSchema.index({ name: 1 });
 productSchema.index({ category: 1 });
 productSchema.index({ organization: 1 });
@@ -181,7 +180,6 @@ productSchema.index({ "inventory.currentStock": 1 });
 productSchema.index({ createdAt: -1 });
 
 // Compound indexes
-productSchema.index({ organization: 1, sku: 1 }, { unique: true });
 productSchema.index({ organization: 1, category: 1 });
 productSchema.index({ organization: 1, status: 1 });
 

@@ -211,7 +211,6 @@ const oauthClientSchema = new mongoose.Schema(
 );
 
 // Indexes
-oauthClientSchema.index({ clientId: 1 });
 oauthClientSchema.index({ organization: 1 });
 oauthClientSchema.index({ createdBy: 1 });
 oauthClientSchema.index({ isActive: 1 });

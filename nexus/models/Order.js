@@ -185,7 +185,6 @@ const orderSchema = new mongoose.Schema(
 );
 
 // Indexes
-orderSchema.index({ orderNumber: 1 });
 orderSchema.index({ organization: 1 });
 orderSchema.index({ customer: 1 });
 orderSchema.index({ supplier: 1 });

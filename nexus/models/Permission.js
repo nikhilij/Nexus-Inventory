@@ -48,7 +48,6 @@ const permissionSchema = new mongoose.Schema(
 );
 
 // Indexes
-permissionSchema.index({ code: 1 });
 permissionSchema.index({ resource: 1, action: 1 });
 permissionSchema.index({ organization: 1 });
 permissionSchema.index({ isSystemPermission: 1 });

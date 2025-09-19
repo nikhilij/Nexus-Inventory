@@ -108,8 +108,6 @@ const inviteSchema = new mongoose.Schema(
 );
 
 // Indexes
-inviteSchema.index({ email: 1 });
-inviteSchema.index({ token: 1 });
 inviteSchema.index({ tokenHash: 1 });
 inviteSchema.index({ organization: 1 });
 inviteSchema.index({ invitedBy: 1 });

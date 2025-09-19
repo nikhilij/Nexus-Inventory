@@ -189,8 +189,6 @@ const featureFlagSchema = new mongoose.Schema(
 );
 
 // Indexes
-featureFlagSchema.index({ name: 1 }, { unique: true });
-featureFlagSchema.index({ key: 1 }, { unique: true });
 featureFlagSchema.index({ organization: 1 });
 featureFlagSchema.index({ isEnabled: 1 });
 featureFlagSchema.index({ "rolloutStrategy.type": 1 });
@@ -199,8 +197,6 @@ featureFlagSchema.index({ isExpired: 1 });
 featureFlagSchema.index({ createdAt: -1 });
 
 // Compound indexes
-featureFlagSchema.index({ organization: 1, name: 1 }, { unique: true });
-featureFlagSchema.index({ organization: 1, key: 1 }, { unique: true });
 featureFlagSchema.index({ organization: 1, isEnabled: 1 });
 featureFlagSchema.index({ organization: 1, "rolloutStrategy.type": 1 });
 featureFlagSchema.index({ isEnabled: 1, expiresAt: 1 });
