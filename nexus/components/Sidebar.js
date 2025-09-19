@@ -168,7 +168,13 @@ const Sidebar = ({ isOpen, onToggle, onClose }) => {
             {/* Footer */}
             <div className="p-4 border-t border-gray-800">
                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={() => {
+                     // Clear PIN verification from localStorage on logout
+                     localStorage.removeItem("pinVerified");
+                     localStorage.removeItem("pinVerifiedAt");
+                     localStorage.removeItem("pinVerifiedUser");
+                     signOut({ callbackUrl: "/" });
+                  }}
                   className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white rounded-md transition-colors cursor-pointer"
                >
                   <FiLogOut size={18} />

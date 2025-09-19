@@ -2,7 +2,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { dbConnect } from "@/lib/dbConnect";
-import { User } from "@/models/index";
+import { User, Role } from "@/models/index";
 import bcrypt from "bcrypt";
 
 export const authOptions = {
@@ -50,6 +50,53 @@ export const authOptions = {
       }),
    ],
    callbacks: {
+      async signIn({ user, account, profile }) {
+         // For OAuth providers, ensure user exists in database
+         if (account?.provider === "google" && user?.email) {
+            try {
+               await dbConnect();
+
+               // Check if user already exists
+               let existingUser = await User.findOne({ email: user.email });
+
+               if (!existingUser) {
+                  // Find default role or create one
+                  let defaultRole = await Role.findOne({ name: "user" });
+
+                  if (!defaultRole) {
+                     // Create default user role if it doesn't exist
+                     defaultRole = new Role({
+                        name: "user",
+                        description: "Default user role",
+                        permissions: [], // Will be empty for now
+                        isSystemRole: true,
+                     });
+                     await defaultRole.save();
+                  }
+
+                  // Create new user for OAuth login
+                  const newUser = new User({
+                     name: user.name,
+                     email: user.email,
+                     emailVerified: true, // OAuth users are pre-verified
+                     status: "active",
+                     role: defaultRole._id,
+                     // Note: organization will need to be set up separately
+                  });
+
+                  existingUser = await newUser.save();
+                  console.log("Created new user from OAuth:", user.email);
+               } // Update user object with database ID
+               user.id = existingUser._id.toString();
+               user.role = existingUser.role;
+            } catch (error) {
+               console.error("Error creating OAuth user:", error);
+               return false; // Deny sign in if user creation fails
+            }
+         }
+
+         return true;
+      },
       async jwt({ token, user }) {
          if (user) {
             token.id = user._id || user.id;

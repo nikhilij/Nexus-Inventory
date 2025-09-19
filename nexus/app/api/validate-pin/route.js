@@ -50,13 +50,13 @@ export async function POST(request) {
       }
 
       // Verify PIN
-      const isValid = await userService.verifyPin(user._id, pin);
+      const pinResult = await userService.verifyPin(user._id, pin);
 
-      if (isValid) {
+      if (pinResult.success) {
          // Create response with success message
          const response = NextResponse.json({
             ok: true,
-            message: "PIN verified successfully",
+            message: pinResult.message,
          });
 
          // Set secure cookie to track PIN verification
@@ -80,10 +80,22 @@ export async function POST(request) {
          return response;
       }
 
+      // Handle different PIN verification failure scenarios
+      if (pinResult.needsSetup) {
+         return NextResponse.json(
+            {
+               ok: false,
+               error: "PIN not set up",
+               needsSetup: true,
+            },
+            { status: 403 }
+         );
+      }
+
       return NextResponse.json(
          {
             ok: false,
-            error: "Invalid PIN",
+            error: pinResult.message,
          },
          { status: 401 }
       );

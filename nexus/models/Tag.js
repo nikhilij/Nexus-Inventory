@@ -77,7 +77,6 @@ const tagSchema = new mongoose.Schema(
 
 // Indexes
 tagSchema.index({ name: 1 });
-tagSchema.index({ slug: 1 });
 tagSchema.index({ organization: 1 });
 tagSchema.index({ category: 1 });
 tagSchema.index({ isActive: 1 });

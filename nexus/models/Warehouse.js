@@ -148,7 +148,6 @@ const warehouseSchema = new mongoose.Schema(
 );
 
 // Indexes
-warehouseSchema.index({ code: 1 });
 warehouseSchema.index({ organization: 1 });
 warehouseSchema.index({ status: 1 });
 warehouseSchema.index({ isPrimary: 1 });

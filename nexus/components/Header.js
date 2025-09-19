@@ -298,7 +298,13 @@ export default function Header({
                               </button>
                               <div className="border-t border-gray-700 my-1"></div>
                               <button
-                                 onClick={() => signOut()}
+                                 onClick={() => {
+                                    // Clear PIN verification from localStorage on logout
+                                    localStorage.removeItem("pinVerified");
+                                    localStorage.removeItem("pinVerifiedAt");
+                                    localStorage.removeItem("pinVerifiedUser");
+                                    signOut();
+                                 }}
                                  role="menuitem"
                                  className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white cursor-pointer"
                               >
@@ -412,7 +418,13 @@ export default function Header({
                            Profile
                         </Link>
                         <button
-                           onClick={() => signOut()}
+                           onClick={() => {
+                              // Clear PIN verification from localStorage on logout
+                              localStorage.removeItem("pinVerified");
+                              localStorage.removeItem("pinVerifiedAt");
+                              localStorage.removeItem("pinVerifiedUser");
+                              signOut();
+                           }}
                            className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-400 hover:text-white hover:bg-red-500 cursor-pointer"
                         >
                            Sign Out

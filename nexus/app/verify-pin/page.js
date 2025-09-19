@@ -14,13 +14,28 @@ export default function PinVerificationPage() {
    const router = useRouter();
 
    useEffect(() => {
-      // Check if user is already verified
+      // Check if user is already verified and verification is still valid
       const verified = localStorage.getItem("pinVerified");
-      if (verified === "true") {
-         setIsVerified(true);
-         router.push("/dashboard");
+      const verifiedAt = localStorage.getItem("pinVerifiedAt");
+      const verifiedUser = localStorage.getItem("pinVerifiedUser");
+
+      if (verified === "true" && verifiedAt && verifiedUser) {
+         const verificationTime = new Date(verifiedAt);
+         const now = new Date();
+         const hoursSinceVerification = (now - verificationTime) / (1000 * 60 * 60);
+
+         // Check if verification is still valid (within 24 hours) and for the same user
+         if (hoursSinceVerification < 24 && verifiedUser === session?.user?.email) {
+            setIsVerified(true);
+            router.push("/dashboard");
+         } else {
+            // Clear expired verification
+            localStorage.removeItem("pinVerified");
+            localStorage.removeItem("pinVerifiedAt");
+            localStorage.removeItem("pinVerifiedUser");
+         }
       }
-   }, [router]);
+   }, [router, session]);
 
    useEffect(() => {
       if (status === "unauthenticated") {
@@ -48,6 +63,7 @@ export default function PinVerificationPage() {
             // Store verification in localStorage for client-side checks
             localStorage.setItem("pinVerified", "true");
             localStorage.setItem("pinVerifiedAt", new Date().toISOString());
+            localStorage.setItem("pinVerifiedUser", session?.user?.email);
 
             setIsVerified(true);
 

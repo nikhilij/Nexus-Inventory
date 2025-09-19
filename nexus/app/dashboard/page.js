@@ -21,11 +21,40 @@ export default function Dashboard() {
       // Check PIN verification status
       const checkPinStatus = async () => {
          try {
-            const response = await fetch("/api/validate-pin");
+            // First check if PIN is verified via localStorage
+            const verified = localStorage.getItem("pinVerified");
+            const verifiedAt = localStorage.getItem("pinVerifiedAt");
+            const verifiedUser = localStorage.getItem("pinVerifiedUser");
+
+            if (verified === "true" && verifiedAt && verifiedUser === session?.user?.email) {
+               const verificationTime = new Date(verifiedAt);
+               const now = new Date();
+               const hoursSinceVerification = (now - verificationTime) / (1000 * 60 * 60);
+
+               // Check if verification is still valid (within 24 hours)
+               if (hoursSinceVerification < 24) {
+                  setPinStatus({ verified: true, verifiedAt });
+                  return;
+               } else {
+                  // Clear expired verification
+                  localStorage.removeItem("pinVerified");
+                  localStorage.removeItem("pinVerifiedAt");
+                  localStorage.removeItem("pinVerifiedUser");
+               }
+            }
+
+            // Check if user has PIN set up
+            const response = await fetch("/api/setup-pin");
             const data = await response.json();
-            setPinStatus(data);
+
+            if (data.hasPin) {
+               setPinStatus({ verified: false, hasPin: true });
+            } else {
+               setPinStatus({ verified: false, hasPin: false, needsSetup: true });
+            }
          } catch (error) {
             console.error("Failed to check PIN status:", error);
+            setPinStatus({ verified: false, error: "Failed to check PIN status" });
          }
       };
 
@@ -57,13 +86,27 @@ export default function Dashboard() {
                      <div>
                         <h3 className="text-sm font-medium text-yellow-800">Security Verification Required</h3>
                         <p className="mt-1 text-sm text-yellow-700">
-                           You need to verify your PIN to access inventory features.
-                           <button
-                              onClick={() => router.push("/verify-pin")}
-                              className="ml-2 font-medium underline hover:text-yellow-800"
-                           >
-                              Verify PIN
-                           </button>
+                           {pinStatus?.needsSetup ? (
+                              <>
+                                 You need to set up a PIN to access inventory features.
+                                 <button
+                                    onClick={() => router.push("/setup-pin")}
+                                    className="ml-2 font-medium underline hover:text-yellow-800"
+                                 >
+                                    Set up PIN
+                                 </button>
+                              </>
+                           ) : (
+                              <>
+                                 You need to verify your PIN to access inventory features.
+                                 <button
+                                    onClick={() => router.push("/verify-pin")}
+                                    className="ml-2 font-medium underline hover:text-yellow-800"
+                                 >
+                                    Verify PIN
+                                 </button>
+                              </>
+                           )}
                         </p>
                      </div>
                   </div>
@@ -148,6 +191,21 @@ export default function Dashboard() {
                               {pinStatus.verifiedAt ? new Date(pinStatus.verifiedAt).toLocaleString() : "Unknown"}
                            </p>
                         </div>
+                     </div>
+                  </div>
+               ) : pinStatus?.needsSetup ? (
+                  <div className="text-center py-12">
+                     <FiShield className="mx-auto h-12 w-12 text-gray-400" />
+                     <h3 className="mt-2 text-sm font-medium text-gray-900">PIN Setup Required</h3>
+                     <p className="mt-1 text-sm text-gray-500">Please set up your PIN to access inventory features.</p>
+                     <div className="mt-6">
+                        <button
+                           onClick={() => router.push("/setup-pin")}
+                           className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                           <FiShield className="mr-2 h-5 w-5" />
+                           Set up PIN
+                        </button>
                      </div>
                   </div>
                ) : (

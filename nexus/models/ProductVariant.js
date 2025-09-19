@@ -142,7 +142,6 @@ const productVariantSchema = new mongoose.Schema(
 );
 
 // Indexes
-productVariantSchema.index({ sku: 1 });
 productVariantSchema.index({ product: 1 });
 productVariantSchema.index({ organization: 1 });
 productVariantSchema.index({ isActive: 1 });

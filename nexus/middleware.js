@@ -19,6 +19,12 @@ export default withAuth(
          const pinVerified = req.cookies.get("pinVerified")?.value;
 
          if (!pinVerified || pinVerified !== "true") {
+            // If PIN is not verified, check if user needs to set up PIN first
+            // For now, we'll allow access to setup-pin route
+            if (pathname.startsWith("/setup-pin")) {
+               return NextResponse.next();
+            }
+
             // Redirect to PIN verification
             const verifyPinUrl = new URL("/verify-pin", req.url);
             verifyPinUrl.searchParams.set("callbackUrl", pathname);
@@ -43,5 +49,6 @@ export const config = {
       "/orders/:path*",
       "/warehouse/:path*",
       "/reports/:path*",
+      "/setup-pin",
    ],
 };

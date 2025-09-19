@@ -121,17 +121,26 @@ export const userService = {
     * Verify user's PIN
     * @param {String} userId - User ID
     * @param {String} pin - PIN to verify
-    * @returns {Promise<Boolean>} - Success status
+    * @returns {Promise<Object>} - Result object with success status and message
     */
    async verifyPin(userId, pin) {
       await dbConnect();
       const user = await User.findById(userId);
 
-      if (!user || !user.pin) {
-         return false;
+      if (!user) {
+         return { success: false, message: "User not found" };
+      }
+
+      if (!user.pin) {
+         return { success: false, message: "PIN not set up", needsSetup: true };
       }
 
       // In a real app, use a proper comparison method that's timing-safe
-      return user.pin === pin;
+      const isValid = user.pin === pin;
+
+      return {
+         success: isValid,
+         message: isValid ? "PIN verified successfully" : "Invalid PIN",
+      };
    },
 };

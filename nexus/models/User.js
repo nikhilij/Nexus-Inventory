@@ -65,6 +65,18 @@ const userSchema = new mongoose.Schema(
       emailVerificationToken: String,
       passwordResetToken: String,
       passwordResetExpires: Date,
+      pin: {
+         type: String,
+         required: false, // PIN is optional, will be set up later
+         minlength: 6,
+         maxlength: 6,
+         validate: {
+            validator: function (v) {
+               return /^\d{6}$/.test(v); // Must be exactly 6 digits
+            },
+            message: "PIN must be exactly 6 digits",
+         },
+      },
    },
    {
       timestamps: true,

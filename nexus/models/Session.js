@@ -90,7 +90,6 @@ const sessionSchema = new mongoose.Schema(
 );
 
 // Indexes
-sessionSchema.index({ sid: 1 });
 sessionSchema.index({ user: 1 });
 sessionSchema.index({ organization: 1 });
 sessionSchema.index({ expires: 1 });

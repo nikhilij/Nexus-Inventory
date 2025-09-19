@@ -210,7 +210,6 @@ const supplierSchema = new mongoose.Schema(
 
 // Indexes
 supplierSchema.index({ name: 1 });
-supplierSchema.index({ code: 1 });
 supplierSchema.index({ organization: 1 });
 supplierSchema.index({ status: 1 });
 supplierSchema.index({ isPreferred: 1 });

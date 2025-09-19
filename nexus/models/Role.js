@@ -41,7 +41,6 @@ const roleSchema = new mongoose.Schema(
 );
 
 // Indexes
-roleSchema.index({ name: 1 });
 roleSchema.index({ organization: 1 });
 roleSchema.index({ isSystemRole: 1 });
 
