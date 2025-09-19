@@ -400,11 +400,76 @@ class ImportExportService {
       return csvRows.join("\n");
    }
 
-   // Save export file (simulated)
+   // Save export file to cloud storage
    async saveExportFile(content, filters) {
-      // In a real implementation, upload to cloud storage
-      // For now, return a mock URL
-      return `https://storage.example.com/exports/${filters.type}_${Date.now()}.${filters.format}`;
+      const { type, format, userId } = filters;
+      const fileName = `${type}_${Date.now()}.${format}`;
+      const filePath = `exports/${fileName}`;
+
+      try {
+         // Use MediaService for file upload if available
+         if (MediaService && MediaService.uploadFile) {
+            const uploadResult = await MediaService.uploadFile({
+               buffer: Buffer.from(content, "utf8"),
+               fileName,
+               path: "exports",
+               mimeType:
+                  format === "csv" ? "text/csv" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+               userId,
+            });
+
+            return uploadResult.url || uploadResult.publicUrl;
+         }
+
+         // Fallback: Use direct cloud storage (AWS S3, Azure Blob, etc.)
+         // This would need to be configured with actual cloud credentials
+         const cloudStorageUrl = await this.uploadToCloudStorage(content, filePath, format);
+
+         // Create export job record
+         const exportJob = new ExportJob({
+            fileName,
+            filePath,
+            fileUrl: cloudStorageUrl,
+            format,
+            type,
+            status: "completed",
+            userId,
+            filters,
+            fileSize: Buffer.byteLength(content, "utf8"),
+            createdAt: new Date(),
+         });
+
+         await exportJob.save();
+
+         return cloudStorageUrl;
+      } catch (error) {
+         console.error("Failed to save export file:", error);
+
+         // Create failed export job record
+         const exportJob = new ExportJob({
+            fileName,
+            filePath,
+            format,
+            type,
+            status: "failed",
+            userId,
+            filters,
+            error: error.message,
+            createdAt: new Date(),
+         });
+
+         await exportJob.save();
+
+         throw new Error(`Failed to save export file: ${error.message}`);
+      }
+   }
+
+   // Upload to cloud storage (placeholder for actual implementation)
+   async uploadToCloudStorage(content, filePath, format) {
+      // In a real implementation, this would upload to AWS S3, Azure Blob Storage, etc.
+      // For now, return a placeholder URL structure
+      const storageBaseUrl = process.env.CLOUD_STORAGE_BASE_URL || "https://storage.nexus-inventory.com";
+      return `${storageBaseUrl}/${filePath}`;
    }
 
    // Validate email

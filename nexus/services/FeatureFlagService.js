@@ -1,5 +1,5 @@
 // services/FeatureFlagService.js
-import { FeatureFlag, FeatureRollout, UserFeatureOverride } from "../models/index.js";
+import { FeatureFlag, FeatureRollout, UserFeatureOverride, AuditLog } from "../models/index.js";
 
 class FeatureFlagService {
    // Check if feature is enabled for user
@@ -314,23 +314,82 @@ class FeatureFlagService {
    }
 
    // Get feature flag analytics
-   async getFeatureAnalytics(flagName, dateRange) {
-      // In a real implementation, track feature usage
-      // For now, return mock analytics
+   async getFeatureAnalytics(flagName, dateRange = {}) {
+      const matchConditions = {
+         action: { $in: ["feature_enabled", "feature_disabled", "feature_accessed"] },
+         resource: flagName,
+      };
+
+      if (dateRange.start) matchConditions.timestamp = { $gte: new Date(dateRange.start) };
+      if (dateRange.end) matchConditions.timestamp = { ...matchConditions.timestamp, $lte: new Date(dateRange.end) };
+
+      // Get audit logs for this feature flag
+      const auditLogs = await AuditLog.find(matchConditions).sort({ timestamp: 1 });
+
+      // Get current feature flag status
+      const featureFlag = await FeatureFlag.findOne({ name: flagName });
+      if (!featureFlag) {
+         throw new Error(`Feature flag '${flagName}' not found`);
+      }
+
+      // Calculate user counts
+      const uniqueUsers = new Set(auditLogs.map((log) => log.user?.toString()).filter(Boolean));
+      const totalUsers = uniqueUsers.size;
+
+      // Get enabled/disabled counts from recent logs
+      const recentLogs = auditLogs.filter((log) => {
+         const logDate = new Date(log.timestamp);
+         const weekAgo = new Date();
+         weekAgo.setDate(weekAgo.getDate() - 7);
+         return logDate >= weekAgo;
+      });
+
+      const enabledUsers = recentLogs.filter((log) => log.action === "feature_enabled").length;
+      const disabledUsers = recentLogs.filter((log) => log.action === "feature_disabled").length;
+
+      // Calculate conversion rate (users who enabled vs total who accessed)
+      const accessedUsers = recentLogs.filter((log) => log.action === "feature_accessed").length;
+      const conversionRate = accessedUsers > 0 ? (enabledUsers / accessedUsers) * 100 : 0;
+
+      // Generate daily trends
+      const trends = [];
+      const dailyStats = {};
+
+      auditLogs.forEach((log) => {
+         const date = log.timestamp.toISOString().split("T")[0];
+         if (!dailyStats[date]) {
+            dailyStats[date] = { enabled: 0, disabled: 0, accessed: 0 };
+         }
+
+         if (log.action === "feature_enabled") dailyStats[date].enabled++;
+         else if (log.action === "feature_disabled") dailyStats[date].disabled++;
+         else if (log.action === "feature_accessed") dailyStats[date].accessed++;
+      });
+
+      // Convert to trends array
+      Object.keys(dailyStats)
+         .sort()
+         .forEach((date) => {
+            trends.push({
+               date,
+               enabledUsers: dailyStats[date].enabled,
+               disabledUsers: dailyStats[date].disabled,
+               accessedUsers: dailyStats[date].accessed,
+            });
+         });
+
       return {
          flagName,
          dateRange,
          usage: {
-            totalUsers: 1250,
-            enabledUsers: 750,
-            disabledUsers: 500,
-            conversionRate: 60,
+            totalUsers,
+            enabledUsers,
+            disabledUsers,
+            conversionRate: Math.round(conversionRate * 100) / 100, // Round to 2 decimal places
          },
-         trends: [
-            { date: "2024-01-01", enabledUsers: 700 },
-            { date: "2024-01-02", enabledUsers: 720 },
-            // ... more data
-         ],
+         trends,
+         currentStatus: featureFlag.isEnabled ? "enabled" : "disabled",
+         rolloutStrategy: featureFlag.rolloutStrategy,
       };
    }
 }

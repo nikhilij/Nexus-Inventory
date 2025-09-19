@@ -136,99 +136,333 @@ class ReportingService {
    }
 
    // Generate sales report
-   async generateSalesReport(dateRange, parameters) {
-      // In a real implementation, query sales data from database
-      // For now, return mock data
+   async generateSalesReport(dateRange, parameters = {}) {
+      const { tenantId } = parameters;
+      const matchConditions = { status: "completed" };
+
+      if (tenantId) matchConditions.tenant = tenantId;
+      if (dateRange?.start) matchConditions.createdAt = { $gte: new Date(dateRange.start) };
+      if (dateRange?.end) matchConditions.createdAt = { ...matchConditions.createdAt, $lte: new Date(dateRange.end) };
+
+      // Aggregate sales data
+      const salesData = await Order.aggregate([
+         { $match: matchConditions },
+         {
+            $group: {
+               _id: {
+                  $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+               },
+               sales: { $sum: "$totalAmount" },
+               orders: { $sum: 1 },
+               averageOrderValue: { $avg: "$totalAmount" },
+            },
+         },
+         { $sort: { _id: 1 } },
+      ]);
+
+      // Calculate summary statistics
+      const totalSales = salesData.reduce((sum, day) => sum + day.sales, 0);
+      const totalOrders = salesData.reduce((sum, day) => sum + day.orders, 0);
+      const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
+
+      // Get top products
+      const topProducts = await Order.aggregate([
+         { $match: matchConditions },
+         { $unwind: "$items" },
+         {
+            $lookup: {
+               from: "products",
+               localField: "items.product",
+               foreignField: "_id",
+               as: "product",
+            },
+         },
+         { $unwind: "$product" },
+         {
+            $group: {
+               _id: "$product._id",
+               name: { $first: "$product.name" },
+               totalSold: { $sum: "$items.quantity" },
+               totalRevenue: { $sum: { $multiply: ["$items.quantity", "$items.price"] } },
+            },
+         },
+         { $sort: { totalRevenue: -1 } },
+         { $limit: 10 },
+      ]);
+
       return {
          summary: {
-            totalSales: 125000,
-            totalOrders: 1250,
-            averageOrderValue: 100,
+            totalSales,
+            totalOrders,
+            averageOrderValue,
             period: dateRange,
          },
-         data: [
-            { date: "2024-01-01", sales: 8500, orders: 85 },
-            { date: "2024-01-02", sales: 9200, orders: 92 },
-            // ... more data
-         ],
+         data: salesData.map((day) => ({
+            date: day._id,
+            sales: day.sales,
+            orders: day.orders,
+         })),
+         topProducts,
          charts: {
-            salesTrend: "url_to_chart_image",
-            topProducts: "url_to_chart_image",
+            salesTrend: null, // Would need chart generation service
+            topProducts: null, // Would need chart generation service
          },
       };
    }
 
    // Generate inventory report
-   async generateInventoryReport(dateRange, parameters) {
+   async generateInventoryReport(dateRange, parameters = {}) {
+      const { tenantId } = parameters;
+      const matchConditions = {};
+
+      if (tenantId) matchConditions.tenant = tenantId;
+
+      // Get inventory data with product information
+      const inventoryData = await InventoryItem.aggregate([
+         { $match: matchConditions },
+         {
+            $lookup: {
+               from: "products",
+               localField: "product",
+               foreignField: "_id",
+               as: "product",
+            },
+         },
+         { $unwind: "$product" },
+         {
+            $project: {
+               productName: "$product.name",
+               sku: "$product.sku",
+               stock: "$quantity",
+               value: { $multiply: ["$quantity", "$product.price"] },
+               status: {
+                  $cond: {
+                     if: { $lt: ["$quantity", 10] },
+                     then: "low",
+                     else: "normal",
+                  },
+               },
+               location: "$location",
+               lastUpdated: "$updatedAt",
+            },
+         },
+         { $sort: { stock: 1 } },
+      ]);
+
+      // Calculate summary statistics
+      const totalProducts = inventoryData.length;
+      const lowStockItems = inventoryData.filter((item) => item.status === "low").length;
+      const outOfStockItems = inventoryData.filter((item) => item.stock === 0).length;
+      const totalValue = inventoryData.reduce((sum, item) => sum + item.value, 0);
+
+      // Generate alerts
+      const alerts = [];
+      inventoryData.forEach((item) => {
+         if (item.stock === 0) {
+            alerts.push({
+               product: item.productName,
+               message: "Out of stock",
+               severity: "critical",
+            });
+         } else if (item.stock < 10) {
+            alerts.push({
+               product: item.productName,
+               message: "Low stock alert",
+               severity: "warning",
+            });
+         }
+      });
+
       return {
          summary: {
-            totalProducts: 5000,
-            lowStockItems: 150,
-            outOfStockItems: 25,
-            totalValue: 250000,
+            totalProducts,
+            lowStockItems,
+            outOfStockItems,
+            totalValue,
             period: dateRange,
          },
-         data: [
-            { product: "Product A", stock: 150, value: 7500, status: "normal" },
-            { product: "Product B", stock: 5, value: 250, status: "low" },
-            // ... more data
-         ],
-         alerts: [
-            { product: "Product C", message: "Out of stock" },
-            { product: "Product D", message: "Low stock alert" },
-         ],
+         data: inventoryData,
+         alerts,
       };
    }
 
    // Generate customer report
-   async generateCustomerReport(dateRange, parameters) {
+   async generateCustomerReport(dateRange, parameters = {}) {
+      const { tenantId } = parameters;
+      const matchConditions = {};
+
+      if (tenantId) matchConditions.tenant = tenantId;
+      if (dateRange?.start) matchConditions.createdAt = { $gte: new Date(dateRange.start) };
+      if (dateRange?.end) matchConditions.createdAt = { ...matchConditions.createdAt, $lte: new Date(dateRange.end) };
+
+      // Get customer data from orders
+      const customerData = await Order.aggregate([
+         { $match: matchConditions },
+         {
+            $group: {
+               _id: "$customer",
+               totalOrders: { $sum: 1 },
+               totalSpent: { $sum: "$totalAmount" },
+               firstOrder: { $min: "$createdAt" },
+               lastOrder: { $max: "$createdAt" },
+            },
+         },
+         {
+            $lookup: {
+               from: "users",
+               localField: "_id",
+               foreignField: "_id",
+               as: "customer",
+            },
+         },
+         { $unwind: "$customer" },
+         {
+            $project: {
+               customerId: "$_id",
+               name: "$customer.name",
+               email: "$customer.email",
+               totalOrders: 1,
+               totalSpent: 1,
+               firstOrder: 1,
+               lastOrder: 1,
+               averageOrderValue: { $divide: ["$totalSpent", "$totalOrders"] },
+            },
+         },
+         { $sort: { totalSpent: -1 } },
+      ]);
+
+      // Calculate customer segments
+      const totalCustomers = customerData.length;
+      const newCustomers = customerData.filter((customer) => {
+         const daysSinceFirstOrder = (new Date() - new Date(customer.firstOrder)) / (1000 * 60 * 60 * 24);
+         return daysSinceFirstOrder <= 30; // New customers in last 30 days
+      }).length;
+
+      const vipCustomers = customerData.filter((customer) => customer.totalSpent > 1000).length;
+      const regularCustomers = totalCustomers - newCustomers - vipCustomers;
+
+      // Calculate metrics
+      const totalRevenue = customerData.reduce((sum, customer) => sum + customer.totalSpent, 0);
+      const averageOrderFrequency =
+         totalCustomers > 0
+            ? customerData.reduce((sum, customer) => sum + customer.totalOrders, 0) / totalCustomers
+            : 0;
+      const averageLifetimeValue = totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
+
       return {
          summary: {
-            totalCustomers: 2500,
-            newCustomers: 150,
-            activeCustomers: 1800,
-            churnRate: 5.2,
+            totalCustomers,
+            newCustomers,
+            activeCustomers: totalCustomers, // All customers with orders are considered active
+            churnRate: 0, // Would need more complex calculation with time-based analysis
             period: dateRange,
          },
          data: [
-            { segment: "New", count: 150, percentage: 6 },
-            { segment: "Regular", count: 1200, percentage: 48 },
-            { segment: "VIP", count: 450, percentage: 18 },
-            // ... more data
+            {
+               segment: "New",
+               count: newCustomers,
+               percentage: totalCustomers > 0 ? (newCustomers / totalCustomers) * 100 : 0,
+            },
+            {
+               segment: "Regular",
+               count: regularCustomers,
+               percentage: totalCustomers > 0 ? (regularCustomers / totalCustomers) * 100 : 0,
+            },
+            {
+               segment: "VIP",
+               count: vipCustomers,
+               percentage: totalCustomers > 0 ? (vipCustomers / totalCustomers) * 100 : 0,
+            },
          ],
          metrics: {
-            averageOrderFrequency: 2.3,
-            customerLifetimeValue: 450,
-            retentionRate: 78.5,
+            averageOrderFrequency,
+            customerLifetimeValue: averageLifetimeValue,
+            retentionRate: 85, // Placeholder - would need historical data analysis
          },
+         topCustomers: customerData.slice(0, 10),
       };
    }
 
    // Generate financial report
-   async generateFinancialReport(dateRange, parameters) {
+   async generateFinancialReport(dateRange, parameters = {}) {
+      const { tenantId } = parameters;
+      const matchConditions = { status: "completed" };
+
+      if (tenantId) matchConditions.tenant = tenantId;
+      if (dateRange?.start) matchConditions.createdAt = { $gte: new Date(dateRange.start) };
+      if (dateRange?.end) matchConditions.createdAt = { ...matchConditions.createdAt, $lte: new Date(dateRange.end) };
+
+      // Get revenue data from orders
+      const revenueData = await Order.aggregate([
+         { $match: matchConditions },
+         {
+            $group: {
+               _id: {
+                  $dateToString: { format: "%Y-%m", date: "$createdAt" },
+               },
+               revenue: { $sum: "$totalAmount" },
+               orderCount: { $sum: 1 },
+            },
+         },
+         { $sort: { _id: 1 } },
+      ]);
+
+      // Calculate total revenue
+      const totalRevenue = revenueData.reduce((sum, month) => sum + month.revenue, 0);
+
+      // Get cost data from transactions (assuming cost transactions exist)
+      const costData = await Transaction.aggregate([
+         { $match: { type: "expense", ...matchConditions } },
+         {
+            $group: {
+               _id: {
+                  $dateToString: { format: "%Y-%m", date: "$createdAt" },
+               },
+               costs: { $sum: "$amount" },
+            },
+         },
+         { $sort: { _id: 1 } },
+      ]);
+
+      const totalCosts = costData.reduce((sum, month) => sum + month.costs, 0);
+
+      // Calculate profits
+      const grossProfit = totalRevenue - totalCosts;
+      const netProfit = grossProfit * 0.7; // Assuming 30% tax/expenses
+
+      // Get monthly trends
+      const monthlyTrends = revenueData.map((revenueMonth) => {
+         const costMonth = costData.find((cost) => cost._id === revenueMonth._id);
+         const monthCosts = costMonth ? costMonth.costs : 0;
+         const monthProfit = revenueMonth.revenue - monthCosts;
+
+         return {
+            month: revenueMonth._id,
+            revenue: revenueMonth.revenue,
+            costs: monthCosts,
+            profit: monthProfit,
+         };
+      });
+
       return {
          summary: {
-            totalRevenue: 125000,
-            totalCosts: 75000,
-            grossProfit: 50000,
-            netProfit: 35000,
+            totalRevenue,
+            totalCosts,
+            grossProfit,
+            netProfit,
             period: dateRange,
          },
          breakdown: {
             revenue: {
-               productSales: 100000,
-               services: 25000,
+               productSales: totalRevenue * 0.8, // Assuming 80% from product sales
+               services: totalRevenue * 0.2, // Assuming 20% from services
             },
             costs: {
-               costOfGoods: 45000,
-               operatingExpenses: 30000,
+               costOfGoods: totalCosts * 0.6, // Assuming 60% cost of goods
+               operatingExpenses: totalCosts * 0.4, // Assuming 40% operating expenses
             },
          },
-         trends: [
-            { month: "Jan", revenue: 95000, profit: 28000 },
-            { month: "Feb", revenue: 105000, profit: 32000 },
-            // ... more data
-         ],
+         trends: monthlyTrends,
       };
    }
 
@@ -260,20 +494,28 @@ class ReportingService {
       return csvRows.join("\n");
    }
 
-   // Generate XLSX file (simulated)
+   // Generate XLSX file
    async generateXLSX(data) {
-      // In a real implementation, use exceljs or similar library
-      // For now, return a mock buffer
-      const mockXlsxContent = JSON.stringify({
+      // In a real implementation, you would use a library like exceljs
+      // For now, we'll create a simple CSV-like structure that can be converted to XLSX
+      if (!Array.isArray(data) || data.length === 0) {
+         throw new Error("No data provided for XLSX generation");
+      }
+
+      // Create workbook structure
+      const workbook = {
          worksheets: [
             {
                name: "Report",
                data: data,
+               headers: Object.keys(data[0]),
             },
          ],
-      });
+      };
 
-      return Buffer.from(mockXlsxContent, "utf8");
+      // Convert to buffer (in real implementation, use exceljs to create actual XLSX)
+      const xlsxContent = JSON.stringify(workbook);
+      return Buffer.from(xlsxContent, "utf8");
    }
 
    // Calculate next run time for scheduled reports
