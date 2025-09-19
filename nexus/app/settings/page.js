@@ -89,7 +89,7 @@ export default function Settings() {
                                  <span className="text-sm font-medium text-gray-700">{item.label}</span>
                                  <div className="flex items-center gap-3">
                                     <span className="text-sm text-gray-900">{item.value}</span>
-                                    <button className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                    <button className="text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer">
                                        Edit
                                     </button>
                                  </div>

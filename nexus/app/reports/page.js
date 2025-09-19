@@ -267,7 +267,7 @@ export default function Reports() {
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-green-600 bg-green-100">
                            Active
                         </span>
-                        <button className="text-gray-600 hover:text-gray-900">
+                        <button className="text-gray-600 hover:text-gray-900 cursor-pointer">
                            <FiFileText className="h-5 w-5" />
                         </button>
                      </div>
@@ -282,7 +282,7 @@ export default function Reports() {
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-green-600 bg-green-100">
                            Active
                         </span>
-                        <button className="text-gray-600 hover:text-gray-900">
+                        <button className="text-gray-600 hover:text-gray-900 cursor-pointer">
                            <FiFileText className="h-5 w-5" />
                         </button>
                      </div>
