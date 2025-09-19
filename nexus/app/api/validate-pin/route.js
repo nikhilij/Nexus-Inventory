@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthSession } from "@/lib/auth";
+import { getAuthServerSession } from "@/lib/apiAuth";
 import { userService } from "@/lib/userService";
 
 /**
@@ -9,10 +9,10 @@ import { userService } from "@/lib/userService";
  */
 export async function POST(request) {
    try {
-      const session = await getAuthSession();
+      const { isAuthenticated, user } = await getAuthServerSession();
 
       // Ensure user is authenticated
-      if (!session || !session.user) {
+      if (!isAuthenticated || !user) {
          return NextResponse.json(
             {
                ok: false,
@@ -37,9 +37,9 @@ export async function POST(request) {
       }
 
       // Get user from database
-      const user = await userService.getUserByEmail(session.user.email);
+      const dbUser = await userService.getUserByEmail(user.email);
 
-      if (!user) {
+      if (!dbUser) {
          return NextResponse.json(
             {
                ok: false,
@@ -50,7 +50,7 @@ export async function POST(request) {
       }
 
       // Verify PIN
-      const pinResult = await userService.verifyPin(user._id, pin);
+      const pinResult = await userService.verifyPin(dbUser._id, pin);
 
       if (pinResult.success) {
          // Create response with success message
@@ -87,6 +87,7 @@ export async function POST(request) {
                ok: false,
                error: "PIN not set up",
                needsSetup: true,
+               setupUrl: "/setup-pin",
             },
             { status: 403 }
          );

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FiLock, FiArrowRight } from "react-icons/fi";
+import { FiMail } from "react-icons/fi";
 
 export default function PinVerificationPage() {
    const [pin, setPin] = useState("");
@@ -73,6 +74,12 @@ export default function PinVerificationPage() {
 
             router.push(callbackUrl);
          } else {
+            // If backend indicates PIN is not set up, redirect to setup page
+            if (data.needsSetup) {
+               router.push("/setup-pin");
+               return;
+            }
+
             setError(data.error || "Invalid PIN");
             setPin("");
          }
@@ -171,7 +178,41 @@ export default function PinVerificationPage() {
                </div>
 
                <div className="text-center">
-                  <p className="text-sm text-gray-600">Forgot your PIN? Contact your administrator.</p>
+                  <div className="flex flex-col items-center space-y-2">
+                     <p className="text-sm text-gray-600">Forgot your PIN? You can request a reset link.</p>
+                     <button
+                        type="button"
+                        onClick={async () => {
+                           setIsLoading(true);
+                           setError(null);
+                           try {
+                              const res = await fetch("/api/forgot-pin", {
+                                 method: "POST",
+                                 headers: { "Content-Type": "application/json" },
+                                 body: JSON.stringify({ email: session?.user?.email }),
+                              });
+                              const body = await res.json();
+                              if (body.ok) {
+                                 setError("Reset link generated. Check your email (or use the provided link in dev).");
+                                 if (body.resetLink) {
+                                    setTimeout(() => {
+                                       window.open(body.resetLink, "_blank");
+                                    }, 300);
+                                 }
+                              } else {
+                                 setError(body.error || "Unable to request reset");
+                              }
+                           } catch (err) {
+                              setError("Failed to request reset. Try again later.");
+                           } finally {
+                              setIsLoading(false);
+                           }
+                        }}
+                        className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                     >
+                        <FiMail className="mr-2" /> Request reset
+                     </button>
+                  </div>
                </div>
             </form>
          </div>

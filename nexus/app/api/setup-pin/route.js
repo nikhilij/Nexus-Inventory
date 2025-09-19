@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthSession } from "@/lib/auth";
+import { getAuthServerSession } from "@/lib/apiAuth";
 import { userService } from "@/lib/userService";
 
 /**
@@ -9,10 +9,14 @@ import { userService } from "@/lib/userService";
  */
 export async function POST(request) {
    try {
-      const session = await getAuthSession();
+      console.log("=== SETUP PIN POST API CALLED ===");
+
+      const { isAuthenticated, user } = await getAuthServerSession();
+
+      console.log("Auth result:", { isAuthenticated, user: user ? { id: user._id, email: user.email } : null });
 
       // Ensure user is authenticated
-      if (!session || !session.user) {
+      if (!isAuthenticated || !user) {
          return NextResponse.json(
             {
                ok: false,
@@ -48,9 +52,11 @@ export async function POST(request) {
       }
 
       // Get user from database
-      const user = await userService.getUserByEmail(session.user.email);
+      console.log("Looking up user with email:", user.email);
+      const dbUser = await userService.getUserByEmail(user.email);
+      console.log("DB User found:", dbUser ? { id: dbUser._id, email: dbUser.email, hasPin: !!dbUser.pin } : null);
 
-      if (!user) {
+      if (!dbUser) {
          return NextResponse.json(
             {
                ok: false,
@@ -61,7 +67,12 @@ export async function POST(request) {
       }
 
       // Update user's PIN
-      const updatedUser = await userService.updateUser(user._id, { pin });
+      const updatedUser = await userService.updateUser(dbUser._id, { pin });
+
+      console.log(
+         "Updated user after setting PIN:",
+         updatedUser ? { id: updatedUser._id, email: updatedUser.email, pin: updatedUser.pin } : null
+      );
 
       if (!updatedUser) {
          return NextResponse.json(
@@ -96,10 +107,14 @@ export async function POST(request) {
  */
 export async function GET(request) {
    try {
-      const session = await getAuthSession();
+      console.log("=== SETUP PIN GET API CALLED ===");
+
+      const { isAuthenticated, user } = await getAuthServerSession();
+
+      console.log("Auth result:", { isAuthenticated, user: user ? { id: user._id, email: user.email } : null });
 
       // Ensure user is authenticated
-      if (!session || !session.user) {
+      if (!isAuthenticated || !user) {
          return NextResponse.json(
             {
                hasPin: false,
@@ -110,9 +125,9 @@ export async function GET(request) {
       }
 
       // Get user from database
-      const user = await userService.getUserByEmail(session.user.email);
+      const dbUser = await userService.getUserByEmail(user.email);
 
-      if (!user) {
+      if (!dbUser) {
          return NextResponse.json(
             {
                hasPin: false,
@@ -123,7 +138,7 @@ export async function GET(request) {
       }
 
       return NextResponse.json({
-         hasPin: !!user.pin,
+         hasPin: !!dbUser.pin,
       });
    } catch (e) {
       console.error("PIN status check error:", e);

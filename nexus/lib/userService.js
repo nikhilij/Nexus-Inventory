@@ -82,9 +82,22 @@ export const userService = {
          delete userData.password;
       }
 
-      const updatedUser = await User.findByIdAndUpdate(id, { $set: userData }, { new: true }).select("-password");
+      try {
+         const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { $set: userData },
+            { new: true, runValidators: true, context: "query" }
+         ).select("-password");
 
-      return updatedUser;
+         return updatedUser;
+      } catch (error) {
+         console.error(
+            "userService.updateUser error:",
+            error && error.message,
+            error && error.errors ? error.errors : error
+         );
+         throw error;
+      }
    },
 
    /**

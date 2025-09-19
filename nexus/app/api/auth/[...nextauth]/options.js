@@ -75,22 +75,39 @@ export const authOptions = {
                   }
 
                   // Create new user for OAuth login
+                  // Generate a random temporary password and hash it so Mongoose validation passes
+                  const tempPassword = Math.random().toString(36).slice(-12);
+                  const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
                   const newUser = new User({
                      name: user.name,
                      email: user.email,
+                     password: hashedPassword,
                      emailVerified: true, // OAuth users are pre-verified
                      status: "active",
                      role: defaultRole._id,
                      // Note: organization will need to be set up separately
                   });
 
+                  console.log("Creating new OAuth user:", {
+                     email: user.email,
+                     name: user.name,
+                     roleId: defaultRole?._id?.toString(),
+                     hashedPasswordPresent: !!hashedPassword,
+                  });
+
                   existingUser = await newUser.save();
-                  console.log("Created new user from OAuth:", user.email);
+                  console.log("Created new user from OAuth:", user.email, "id:", existingUser._id.toString());
                } // Update user object with database ID
                user.id = existingUser._id.toString();
                user.role = existingUser.role;
             } catch (error) {
-               console.error("Error creating OAuth user:", error);
+               console.error(
+                  "Error creating OAuth user:",
+                  error && error.message,
+                  "details:",
+                  error && error.errors ? error.errors : error
+               );
                return false; // Deny sign in if user creation fails
             }
          }
