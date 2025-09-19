@@ -1,109 +1,174 @@
 "use client";
 
-import {useState} from 'react';
-import Link from 'next/link';
+import { useState } from "react";
+import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { FiMail, FiLock, FiLogIn, FiEye, FiEyeOff } from "react-icons/fi";
+import { FcGoogle } from "react-icons/fc";
+import Image from "next/image";
 
-export default function LoginPage(){
-  const [method, setMethod] = useState('password');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [message, setMessage] = useState(null);
+export default function LoginPage() {
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+   const [showPassword, setShowPassword] = useState(false);
+   const [error, setError] = useState(null);
+   const [isLoading, setIsLoading] = useState(false);
+   const router = useRouter();
 
-  async function handlePasswordLogin(e){
-    e.preventDefault();
-    setMessage('Signing in...');
-    try{
-      // Example: POST to your auth endpoint
-      const res = await fetch('/api/auth/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, password, username }) });
-      if(res.ok) setMessage('Signed in (placeholder)'); else setMessage('Sign in failed');
-    }catch(err){ setMessage('Network error'); }
-  }
+   async function handleGoogleSignIn() {
+      setIsLoading(true);
+      setError(null);
+      try {
+         const result = await signIn("google", { redirect: false, callbackUrl: "/" });
+         if (result?.error) {
+            setError(result.error === "Callback" ? "Sign in failed. Please try again." : result.error);
+         } else if (result?.ok) {
+            router.push(result.url || "/");
+         }
+      } catch (err) {
+         setError("An unexpected error occurred during sign-in.");
+      } finally {
+         setIsLoading(false);
+      }
+   }
 
-  async function handleSendOtp(e){
-    e.preventDefault();
-    setMessage('Sending OTP...');
-    try{
-      const res = await fetch('/api/auth/otp/send', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone }) });
-      if(res.ok) setMessage('OTP sent'); else setMessage('Failed to send OTP');
-    }catch(err){ setMessage('Network error'); }
-  }
+   async function handlePasswordLogin(e) {
+      e.preventDefault();
+      setIsLoading(true);
+      setError(null);
 
-  async function handleVerifyOtp(e){
-    e.preventDefault();
-    setMessage('Verifying OTP...');
-    try{
-      const res = await fetch('/api/auth/otp/verify', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone, otp }) });
-      if(res.ok) setMessage('Signed in with OTP (placeholder)'); else setMessage('OTP verification failed');
-    }catch(err){ setMessage('Network error'); }
-  }
+      const result = await signIn("credentials", {
+         redirect: false,
+         email,
+         password,
+      });
 
-  async function handleMagicLink(e){
-    e.preventDefault();
-    setMessage('Sending magic link...');
-    try{
-      const res = await fetch('/api/auth/magic-link', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
-      if(res.ok) setMessage('Magic link sent'); else setMessage('Failed to send magic link');
-    }catch(err){ setMessage('Network error'); }
-  }
+      if (result?.error) {
+         setError("Invalid email or password. Please try again.");
+      } else if (result?.ok) {
+         router.push("/");
+      }
 
-  return (
-    <main style={{padding:24}}>
-      <h1>Sign in</h1>
+      setIsLoading(false);
+   }
 
-      <section aria-label="social logins" style={{marginBottom:12}}>
-        <p>Sign in with</p>
-        <div style={{display:'flex',gap:8}}>
-          <a href="/api/auth/google"><button>Continue with Google</button></a>
-          <a href="/api/auth/github"><button>Continue with GitHub</button></a>
-        </div>
-      </section>
+   return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+         <div className="w-full max-w-md">
+            <div className="text-center mb-8">
+               <div className="inline-block bg-indigo-600 p-3 rounded-full mb-4">
+                  <FiLogIn size={32} />
+               </div>
+               <h1 className="text-4xl font-bold tracking-tight">Welcome Back</h1>
+               <p className="text-gray-400 mt-2">Sign in to access your inventory dashboard.</p>
+            </div>
 
-      <section aria-labelledby="methods-heading">
-        <h2 id="methods-heading">Other ways to sign in</h2>
-        <div style={{display:'flex',gap:8,marginBottom:12}}>
-          <button onClick={()=>setMethod('password')} aria-pressed={method==='password'}>Email / Password</button>
-          <button onClick={()=>setMethod('otp')} aria-pressed={method==='otp'}>Phone (OTP)</button>
-          <button onClick={()=>setMethod('magic')} aria-pressed={method==='magic'}>Magic Link</button>
-        </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-2xl">
+               <button
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                  <FcGoogle size={24} />
+                  <span className="text-sm font-medium">{isLoading ? "Signing in..." : "Continue with Google"}</span>
+               </button>
 
-        {method === 'password' && (
-          <form onSubmit={handlePasswordLogin} aria-label="Email and password login">
-            <label>Email or username<br/><input value={email} onChange={e=>setEmail(e.target.value)} type="email" name="email" autoComplete="email" required /></label><br/>
-            <label>Password<br/><input value={password} onChange={e=>setPassword(e.target.value)} type="password" name="password" autoComplete="current-password" required /></label><br/>
-            <button type="submit">Sign in</button>
-            <p><Link href="/forgot">Forgot password?</Link></p>
-          </form>
-        )}
+               <div className="flex items-center my-6">
+                  <hr className="w-full border-gray-600" />
+                  <span className="px-4 text-xs font-medium text-gray-400">OR</span>
+                  <hr className="w-full border-gray-600" />
+               </div>
 
-        {method === 'otp' && (
-          <div>
-            <form onSubmit={handleSendOtp} aria-label="send otp">
-              <label>Phone number<br/><input value={phone} onChange={e=>setPhone(e.target.value)} type="tel" name="phone" placeholder="+1..." required /></label>
-              <button type="submit">Send OTP</button>
-            </form>
-            <form onSubmit={handleVerifyOtp} aria-label="verify otp">
-              <label>Enter OTP<br/><input value={otp} onChange={e=>setOtp(e.target.value)} type="text" name="otp" inputMode="numeric" /></label>
-              <button onClick={handleVerifyOtp}>Verify OTP</button>
-            </form>
-          </div>
-        )}
+               <form onSubmit={handlePasswordLogin} className="space-y-6">
+                  <div className="relative">
+                     <label htmlFor="email" className="sr-only">
+                        Email
+                     </label>
+                     <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                     <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email address"
+                        required
+                        className="w-full bg-gray-900 border border-gray-700 rounded-lg py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                     />
+                  </div>
 
-        {method === 'magic' && (
-          <form onSubmit={handleMagicLink} aria-label="magic link">
-            <label>Email<br/><input value={email} onChange={e=>setEmail(e.target.value)} type="email" name="email" required /></label>
-            <button type="submit">Send magic link</button>
-          </form>
-        )}
-      </section>
+                  <div className="relative">
+                     <label htmlFor="password" className="sr-only">
+                        Password
+                     </label>
+                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                     <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        required
+                        className="w-full bg-gray-900 border border-gray-700 rounded-lg py-3 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                     />
+                     <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                     >
+                        {showPassword ? <FiEyeOff /> : <FiEye />}
+                     </button>
+                  </div>
 
-      {message && <div role="status" aria-live="polite" style={{marginTop:12}}>{message}</div>}
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center">
+                        <input
+                           id="remember-me"
+                           name="remember-me"
+                           type="checkbox"
+                           className="h-4 w-4 bg-gray-700 border-gray-600 text-indigo-600 focus:ring-indigo-500 rounded"
+                        />
+                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
+                           Remember me
+                        </label>
+                     </div>
+                     <div className="text-sm">
+                        <Link href="/forgot-password" className="font-medium text-indigo-400 hover:text-indigo-300">
+                           Forgot password?
+                        </Link>
+                     </div>
+                  </div>
 
-      <footer style={{marginTop:24}}>
-        <p>New here? <Link href="/signup">Create an account</Link></p>
-      </footer>
-    </main>
-  );
+                  {error && (
+                     <div
+                        role="alert"
+                        className="bg-red-900/50 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg text-sm"
+                     >
+                        {error}
+                     </div>
+                  )}
+
+                  <div>
+                     <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                        <FiLogIn />
+                        <span>{isLoading ? "Signing In..." : "Sign In"}</span>
+                     </button>
+                  </div>
+               </form>
+            </div>
+
+            <p className="text-center text-sm text-gray-400 mt-8">
+               New to Nexus?{" "}
+               <Link href="/signup" className="font-medium text-indigo-400 hover:underline">
+                  Create an account
+               </Link>
+            </p>
+         </div>
+      </div>
+   );
 }

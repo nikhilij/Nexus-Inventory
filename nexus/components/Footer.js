@@ -1,152 +1,234 @@
 "use client";
 
-import {useRef, useState} from 'react';
-import Link from 'next/link';
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { FiMail, FiPhone, FiHelpCircle, FiArrowUp, FiTwitter, FiGithub, FiLinkedin } from "react-icons/fi";
+import Image from "next/image";
 
 export default function Footer({
-  siteMeta = { name: 'Nexus Inventory', logoUrl: null, tagline: 'Inventory management that scales' },
-  navGroups = [
-    { title: 'Product', links: [ {label:'Products', href:'/products'}, {label:'Inventory', href:'/inventory'}, {label:'Pricing', href:'/pricing'}, {label:'Demo', href:'/demo'} ] },
-    { title: 'Company', links: [ {label:'About', href:'/about'}, {label:'Careers', href:'/careers'}, {label:'Blog', href:'/blog'} ] },
-    { title: 'Resources', links: [ {label:'Docs', href:'/docs'}, {label:'API', href:'/api'}, {label:'Tutorials', href:'/tutorials'}, {label:'Status', href:'/status'} ] },
-    { title: 'Support', links: [ {label:'Contact', href:'/contact'}, {label:'Help Center', href:'/help'}, {label:'Community', href:'/community'} ] },
-  ],
-  contact = { email: null, phone: null, supportUrl: null },
-  social = [],
-  legalLinks = [ {label:'Privacy Policy', href:'/privacy'}, {label:'Terms of Service', href:'/terms'}, {label:'Cookie Policy', href:'/cookies'} ],
-  buildInfo = null,
-  localeOptions = null,
-  newsletterAction = null,
-  isAuthenticated = false,
-}){
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterStatus, setNewsletterStatus] = useState(null);
-  const liveRef = useRef(null);
+   siteMeta = { name: "Nexus Inventory", logoUrl: null, tagline: "Inventory management that scales" },
+   navGroups = [
+      {
+         title: "Product",
+         links: [
+            { label: "Platform", href: "/platform" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "Demo", href: "/demo" },
+            { label: "Integrations", href: "/integrations" },
+         ],
+      },
+      {
+         title: "Company",
+         links: [
+            { label: "About Us", href: "/about" },
+            { label: "Careers", href: "/careers" },
+            { label: "Blog", href: "/blog" },
+            { label: "Contact Us", href: "/contact" },
+         ],
+      },
+      {
+         title: "Resources",
+         links: [
+            { label: "Documentation", href: "/docs" },
+            { label: "API Reference", href: "/api" },
+            { label: "Tutorials", href: "/tutorials" },
+            { label: "Status", href: "/status" },
+         ],
+      },
+      {
+         title: "Legal",
+         links: [
+            { label: "Privacy Policy", href: "/privacy" },
+            { label: "Terms of Service", href: "/terms" },
+            { label: "Cookie Policy", href: "/cookies" },
+         ],
+      },
+   ],
+   contact = { email: "support@nexus.com", phone: "+1 (555) 123-4567", supportUrl: "/help" },
+   social = [
+      { provider: "Twitter", href: "https://twitter.com/nexus", icon: <FiTwitter /> },
+      { provider: "GitHub", href: "https://github.com/nexus", icon: <FiGithub /> },
+      { provider: "LinkedIn", href: "https://linkedin.com/company/nexus", icon: <FiLinkedin /> },
+   ],
+   buildInfo = { version: "1.0.0", commit: "a1b2c3d", environment: "Production" },
+   newsletterAction = async (email) => {
+      console.log(`Subscribing ${email}`);
+      return true;
+   },
+}) {
+   const { status } = useSession();
+   const isAuthenticated = status === "authenticated";
+   const [newsletterEmail, setNewsletterEmail] = useState("");
+   const [newsletterStatus, setNewsletterStatus] = useState(null);
+   const liveRef = useRef(null);
 
-  function onNewsletterSubmit(e){
-    e?.preventDefault();
-    if(!newsletterAction){
-      setNewsletterStatus('subscribe-link');
-      liveRef.current?.focus();
-      return;
-    }
-    // allow newsletterAction to be a URL or a callback
-    if(typeof newsletterAction === 'string'){
-      // naive POST, progressive enhancement recommended server-side
-      fetch(newsletterAction, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email: newsletterEmail }) })
-        .then(r=>{ if(r.ok) setNewsletterStatus('subscribed'); else setNewsletterStatus('error'); liveRef.current?.focus(); })
-        .catch(()=>{ setNewsletterStatus('error'); liveRef.current?.focus(); });
-    } else if(typeof newsletterAction === 'function'){
-      Promise.resolve(newsletterAction(newsletterEmail)).then(()=>{ setNewsletterStatus('subscribed'); liveRef.current?.focus(); }).catch(()=>{ setNewsletterStatus('error'); liveRef.current?.focus(); });
-    }
-  }
+   function onNewsletterSubmit(e) {
+      e?.preventDefault();
+      if (!newsletterAction) {
+         setNewsletterStatus("subscribe-link");
+         liveRef.current?.focus();
+         return;
+      }
+      setNewsletterStatus("loading");
+      if (typeof newsletterAction === "string") {
+         fetch(newsletterAction, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: newsletterEmail }),
+         })
+            .then((r) => {
+               if (r.ok) setNewsletterStatus("subscribed");
+               else setNewsletterStatus("error");
+               liveRef.current?.focus();
+            })
+            .catch(() => {
+               setNewsletterStatus("error");
+               liveRef.current?.focus();
+            });
+      } else if (typeof newsletterAction === "function") {
+         Promise.resolve(newsletterAction(newsletterEmail))
+            .then(() => {
+               setNewsletterStatus("subscribed");
+               liveRef.current?.focus();
+            })
+            .catch(() => {
+               setNewsletterStatus("error");
+               liveRef.current?.focus();
+            });
+      }
+   }
 
-  function backToTop(){
-    const main = document.getElementById('content') || document.querySelector('main') || document.body;
-    main.scrollIntoView({ behavior: 'smooth' });
-    // move focus to content start
-    const first = main.querySelector('a,button,input,select,textarea,h1,h2,h3,p');
-    first?.focus();
-  }
+   function backToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      const firstFocusable = document.querySelector("a,button,input,select,textarea,h1,h2,h3,p");
+      firstFocusable?.focus();
+   }
 
-  return (
-    <footer role="contentinfo" className="site-footer" style={{padding:20,background:'#f8f9fa'}}>
-      <div className="footer-top" style={{display:'flex',gap:24,flexWrap:'wrap',justifyContent:'space-between'}}>
-        {/* Left / Brand area */}
-        <div className="footer-brand" style={{minWidth:200}}>
-          <Link href="/" aria-label={`${siteMeta.name} home`}>
-            {siteMeta.logoUrl ? <img src={siteMeta.logoUrl} alt={`${siteMeta.name} logo`} style={{height:32}}/> : <strong>{siteMeta.name}</strong>}
-          </Link>
-          <div className="tagline" style={{fontSize:12,color:'#444'}}>{siteMeta.tagline}</div>
-        </div>
+   return (
+      <footer role="contentinfo" className="bg-gray-900 text-gray-300">
+         <div className="container mx-auto px-6 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+               <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                  <Link href="/" aria-label={`${siteMeta.name} home`} className="flex items-center gap-2 mb-4">
+                     {siteMeta.logoUrl ? (
+                        <Image
+                           src={siteMeta.logoUrl}
+                           alt={`${siteMeta.name} logo`}
+                           width={32}
+                           height={32}
+                           className="rounded-full"
+                        />
+                     ) : (
+                        <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-lg text-white">
+                           N
+                        </div>
+                     )}
+                     <strong className="text-xl font-bold text-white">{siteMeta.name}</strong>
+                  </Link>
+                  <p className="text-sm text-gray-400">{siteMeta.tagline}</p>
+                  <div className="mt-6">
+                     <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                        Subscribe to our newsletter
+                     </h4>
+                     {!isAuthenticated ? (
+                        newsletterAction ? (
+                           <form onSubmit={onNewsletterSubmit} className="flex flex-col sm:flex-row gap-2">
+                              <label htmlFor="footer-newsletter" className="sr-only">
+                                 Email for newsletter
+                              </label>
+                              <input
+                                 id="footer-newsletter"
+                                 type="email"
+                                 placeholder="Your email address"
+                                 value={newsletterEmail}
+                                 onChange={(e) => setNewsletterEmail(e.target.value)}
+                                 className="bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                 required
+                              />
+                              <button
+                                 type="submit"
+                                 className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-500 transition-colors font-semibold whitespace-nowrap"
+                              >
+                                 {newsletterStatus === "loading" ? "Subscribing..." : "Subscribe"}
+                              </button>
+                           </form>
+                        ) : (
+                           <Link href="/subscribe" className="text-indigo-400 hover:underline">
+                              Subscribe to our newsletter
+                           </Link>
+                        )
+                     ) : (
+                        <div className="text-sm">
+                           <p>You are subscribed.</p>
+                           <Link href="/account" className="text-indigo-400 hover:underline">
+                              Manage your subscription
+                           </Link>
+                        </div>
+                     )}
+                     <div aria-live="polite" ref={liveRef} className="sr-only">
+                        {newsletterStatus === "subscribed"
+                           ? "Thank you for subscribing!"
+                           : newsletterStatus === "error"
+                             ? "Failed to subscribe. Please try again."
+                             : ""}
+                     </div>
+                  </div>
+               </div>
 
-        {/* Center / Primary links */}
-        <div className="footer-links" style={{display:'flex',gap:24,flex:1,flexWrap:'wrap'}}>
-          {navGroups.map(group=> (
-            <div key={group.title} className="footer-group" style={{minWidth:120}}>
-              <h4 style={{fontSize:13,margin:'0 0 8px 0'}}>{group.title}</h4>
-              <ul style={{listStyle:'none',padding:0,margin:0}}>
-                {group.links.map(link=> (
-                  <li key={link.href+link.label} style={{marginBottom:6}}>
-                    {link.external ? (
-                      <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
-                    ) : (
-                      <Link href={link.href}>{link.label}</Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
+               {navGroups.map((group) => (
+                  <div key={group.title}>
+                     <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                        {group.title}
+                     </h4>
+                     <ul className="space-y-3">
+                        {group.links.map((link) => (
+                           <li key={link.href + link.label}>
+                              <Link
+                                 href={link.href}
+                                 className="text-gray-300 hover:text-white hover:underline transition-colors"
+                              >
+                                 {link.label}
+                              </Link>
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+               ))}
             </div>
-          ))}
-        </div>
 
-        {/* Right / Utilities & meta */}
-        <div className="footer-utils" style={{minWidth:200}}>
-          <div className="contact">
-            <div style={{fontSize:13,fontWeight:600}}>Contact</div>
-            {contact.supportUrl ? <a href={contact.supportUrl}>Contact support</a> : contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : <div>Support: —</div>}
-            {contact.phone ? <div><a href={`tel:${contact.phone}`}>{contact.phone}</a></div> : null}
-          </div>
-
-          {social?.length > 0 && (
-            <div className="social" style={{marginTop:8}}>
-              {social.map(s=> (
-                <a key={s.provider} href={s.href} aria-label={s.provider} style={{marginRight:8}} target="_blank" rel="noopener noreferrer">{s.provider}</a>
-              ))}
+            <div className="mt-12 border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between">
+               <div className="text-sm text-gray-400 text-center sm:text-left">
+                  &copy; {new Date().getFullYear()} {siteMeta.name}. All rights reserved.
+                  {buildInfo && (
+                     <span className="hidden md:inline-block ml-4">
+                        v{buildInfo.version} ({buildInfo.commit.slice(0, 7)}) - {buildInfo.environment}
+                     </span>
+                  )}
+               </div>
+               <div className="flex items-center gap-4 mt-6 sm:mt-0">
+                  {social.map((s) => (
+                     <a
+                        key={s.provider}
+                        href={s.href}
+                        aria-label={s.provider}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                     >
+                        {s.icon}
+                     </a>
+                  ))}
+                  <button
+                     onClick={backToTop}
+                     aria-label="Back to top"
+                     className="p-2 rounded-full bg-gray-800 hover:bg-indigo-600 text-gray-400 hover:text-white transition-all"
+                  >
+                     <FiArrowUp size={20} />
+                  </button>
+               </div>
             </div>
-          )}
-
-          <div className="newsletter" style={{marginTop:12}}>
-            {!isAuthenticated ? (
-              newsletterAction ? (
-                <form onSubmit={onNewsletterSubmit}>
-                  <label htmlFor="footer-newsletter" className="visually-hidden">Email for newsletter</label>
-                  <input id="footer-newsletter" type="email" placeholder="Email" value={newsletterEmail} onChange={e=>setNewsletterEmail(e.target.value)} />
-                  <button type="submit">Subscribe</button>
-                </form>
-              ) : (
-                <a href="/subscribe">Subscribe to our newsletter</a>
-              )
-            ) : (
-              <div>
-                <Link href="/account">Manage subscription</Link>
-                <div><Link href="/settings">Account settings</Link></div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Legal strip */}
-      <div className="footer-bottom" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:20,borderTop:'1px solid #e6e6e6',paddingTop:12}}>
-        <div className="legal">
-          <div>© {new Date().getFullYear()} {siteMeta.name}</div>
-          <div style={{display:'flex',gap:8}}>
-            {legalLinks.map(l=> (
-              <span key={l.href}><Link href={l.href}>{l.label}</Link></span>
-            ))}
-          </div>
-        </div>
-
-        <div className="meta" style={{fontSize:12,color:'#666'}}>
-          {buildInfo ? (
-            <div>
-              <span>{buildInfo.version ? `v${buildInfo.version}` : null}</span>
-              {buildInfo.commit ? <span style={{marginLeft:8}}>commit {buildInfo.commit.slice(0,7)}</span> : null}
-              {buildInfo.environment ? <span style={{marginLeft:8}}>env: {buildInfo.environment}</span> : null}
-            </div>
-          ) : null}
-
-          <div style={{marginTop:6}}>
-            <button onClick={backToTop} aria-label="Back to top">Back to top</button>
-          </div>
-        </div>
-      </div>
-
-      {/* Live region for status messages */}
-      <div tabIndex={-1} ref={liveRef} aria-live="polite" style={{position:'absolute',left:-9999,top:'auto',width:1,height:1,overflow:'hidden'}}>
-        {newsletterStatus === 'subscribed' ? 'Subscribed to newsletter' : newsletterStatus === 'error' ? 'Failed to subscribe' : newsletterStatus === 'subscribe-link' ? 'Open subscribe page' : ''}
-      </div>
-    </footer>
-  );
+         </div>
+      </footer>
+   );
 }
